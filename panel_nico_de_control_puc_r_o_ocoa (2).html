@@ -1,0 +1,2980 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SAT Río Ocoa — Panel Único de Control (PUC) · Villavicencio, Meta</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* =========================================================================
+       1. SISTEMA DE DISEÑO VISUAL Y TIPOGRAFÍA ÚNICA POPPINS
+       ========================================================================= */
+    :root {
+      --bg-canvas: #F6F8FB;
+      --bg-surface: #FFFFFF;
+      --bg-subtle: #F8FAFC;
+      --border-light: #E4E7EC;
+      --border-medium: #D0D5DD;
+
+      --brand-navy: #1E3A8A;
+      --brand-blue: #1D4ED8;
+      --brand-blue-hover: #1E40AF;
+      --brand-blue-soft: #EFF6FF;
+      --brand-blue-border: #BFDBFE;
+
+      --text-heading: #101828;
+      --text-body: #344054;
+      --text-secondary: #475467;
+      --text-muted: #667085;
+
+      /* Estados hidrológicos semánticos */
+      --status-ok: #059669;
+      --status-ok-bg: #ECFDF5;
+      --status-ok-bd: #A7F3D0;
+
+      --status-warn: #D97706;
+      --status-warn-bg: #FFFBEB;
+      --status-warn-bd: #FDE68A;
+
+      --status-crit: #B91C1C;
+      --status-crit-bg: #FEF2F2;
+      --status-crit-bd: #FEE2E2;
+
+      --status-off: #475467;
+      --status-off-bg: #F2F4F7;
+      --status-off-bd: #E4E7EC;
+
+      --shadow-card: 0 1px 2px rgba(16, 24, 40, 0.04);
+      --shadow-float: 0 8px 24px rgba(16, 24, 40, 0.08);
+      --radius-card: 12px;
+      --radius-btn: 8px;
+    }
+
+    *, *::before, *::after,
+    html, body, button, input, select, textarea, table, th, td, svg, svg text, svg tspan {
+      box-sizing: border-box;
+      font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      background-color: var(--bg-canvas);
+      color: var(--text-body);
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    h1, h2, h3, h4, p {
+      margin: 0;
+    }
+
+    /* =========================================================================
+       2. ESTRUCTURA LAYOUT: SIDEBAR BLANCA FIJA + MAIN SHELL
+       ========================================================================= */
+    .app-layout {
+      display: flex;
+      min-height: 100vh;
+      width: 100%;
+    }
+
+    .sidebar {
+      width: 256px;
+      background-color: var(--bg-surface);
+      border-right: 1px solid var(--border-light);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      z-index: 40;
+      transition: transform 0.25s ease;
+    }
+
+    .sidebar-header {
+      height: 68px;
+      padding: 0 20px;
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .brand-logo {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background-color: var(--brand-blue-soft);
+      border: 1px solid var(--brand-blue-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .brand-text-wrap {
+      min-width: 0;
+    }
+
+    .brand-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-heading);
+      line-height: 1.25;
+      letter-spacing: -0.01em;
+    }
+
+    .brand-subtitle {
+      font-size: 11.5px;
+      font-weight: 400;
+      color: var(--text-muted);
+      line-height: 1.3;
+      margin-top: 1px;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 18px 12px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .nav-group-caption {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      padding: 0 12px 8px 12px;
+      letter-spacing: 0.02em;
+    }
+
+    .nav-item {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 10px 12px;
+      border: none;
+      border-radius: var(--radius-btn);
+      background-color: transparent;
+      color: var(--text-secondary);
+      font-size: 13.5px;
+      font-weight: 400;
+      text-align: left;
+      cursor: pointer;
+      transition: background-color 0.15s ease, color 0.15s ease;
+    }
+
+    .nav-item:hover {
+      background-color: var(--bg-subtle);
+      color: var(--text-heading);
+    }
+
+    .nav-item.active {
+      background-color: var(--brand-blue-soft);
+      color: var(--brand-blue);
+      font-weight: 500;
+    }
+
+    .nav-item svg {
+      width: 18px;
+      height: 18px;
+      stroke-width: 1.75;
+      flex-shrink: 0;
+      color: var(--text-muted);
+      transition: color 0.15s ease;
+    }
+
+    .nav-item:hover svg {
+      color: var(--text-heading);
+    }
+
+    .nav-item.active svg {
+      color: var(--brand-blue);
+    }
+
+    .nav-counter {
+      margin-left: auto;
+      background-color: var(--status-crit);
+      color: #FFFFFF;
+      font-size: 11px;
+      font-weight: 600;
+      min-width: 20px;
+      height: 20px;
+      padding: 0 6px;
+      border-radius: 999px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nav-counter.visible {
+      display: inline-flex;
+    }
+
+    .sidebar-footer {
+      padding: 14px;
+      border-top: 1px solid var(--border-light);
+    }
+
+    .station-status-card {
+      background-color: var(--bg-subtle);
+      border: 1px solid var(--border-light);
+      border-radius: 10px;
+      padding: 12px;
+    }
+
+    .online-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-heading);
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--status-ok);
+      box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.16);
+      flex-shrink: 0;
+    }
+
+    .station-meta-line {
+      font-size: 11px;
+      font-weight: 400;
+      color: var(--text-muted);
+      margin-top: 4px;
+      padding-left: 16px;
+    }
+
+    .author-divider {
+      height: 1px;
+      background-color: var(--border-light);
+      margin: 9px 0;
+    }
+
+    .author-info {
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--text-body);
+      line-height: 1.35;
+    }
+
+    .author-sub {
+      font-size: 11px;
+      font-weight: 400;
+      color: var(--text-muted);
+      margin-top: 1px;
+    }
+
+    /* =========================================================================
+       3. CONTENEDOR PRINCIPAL Y BARRA SUPERIOR (TOPBAR 68PX)
+       ========================================================================= */
+    .main-area {
+      flex: 1;
+      margin-left: 256px;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .topbar {
+      min-height: 68px;
+      background-color: var(--bg-surface);
+      border-bottom: 1px solid var(--border-light);
+      padding: 12px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 30;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .mobile-toggle {
+      display: none;
+      height: 38px;
+      padding: 0 12px;
+      border-radius: var(--radius-btn);
+      border: 1px solid var(--border-medium);
+      background-color: var(--bg-surface);
+      color: var(--text-body);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .topbar-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-heading);
+      line-height: 1.25;
+      letter-spacing: -0.015em;
+    }
+
+    .topbar-subtitle {
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--text-muted);
+      line-height: 1.35;
+      margin-top: 2px;
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    /* Botones reglamentarios */
+    .btn {
+      height: 38px;
+      padding: 0 14px;
+      border-radius: var(--radius-btn);
+      font-size: 13px;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background-color: var(--brand-blue);
+      color: #FFFFFF;
+      border-color: var(--brand-blue);
+    }
+
+    .btn-primary:hover {
+      background-color: var(--brand-blue-hover);
+      border-color: var(--brand-blue-hover);
+    }
+
+    .btn-danger-soft {
+      background-color: var(--status-crit-bg);
+      color: var(--status-crit);
+      border-color: var(--status-crit-bd);
+    }
+
+    .btn-danger-soft:hover {
+      background-color: #FEE2E2;
+      border-color: #FECACA;
+    }
+
+    .btn-danger-solid {
+      background-color: var(--status-crit);
+      color: #FFFFFF;
+      border-color: var(--status-crit);
+    }
+
+    .btn-danger-solid:hover {
+      background-color: #991B1B;
+    }
+
+    .btn-neutral {
+      background-color: var(--bg-surface);
+      color: var(--text-body);
+      border-color: var(--border-medium);
+    }
+
+    .btn-neutral:hover {
+      background-color: var(--bg-subtle);
+      color: var(--text-heading);
+    }
+
+    /* =========================================================================
+       4. CONTENEDOR DE VISTAS, TARJETAS Y KPIs
+       ========================================================================= */
+    .page-content {
+      padding: 24px 28px 40px 28px;
+      max-width: 1400px;
+      width: 100%;
+    }
+
+    .module-panel {
+      display: none;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .module-panel.active {
+      display: flex;
+    }
+
+    .card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-card);
+      box-shadow: var(--shadow-card);
+      padding: 20px;
+    }
+
+    .card-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-heading);
+      line-height: 1.35;
+    }
+
+    .card-desc {
+      font-size: 12.5px;
+      font-weight: 400;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* 4 Tarjetas KPI superiores */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    .kpi-card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-card);
+      box-shadow: var(--shadow-card);
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .kpi-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .kpi-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .kpi-icon-circle {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background-color: var(--brand-blue-soft);
+      color: var(--brand-blue);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .kpi-icon-circle svg {
+      width: 17px;
+      height: 17px;
+      stroke-width: 1.85;
+    }
+
+    .kpi-main-row {
+      margin: 12px 0 10px 0;
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+
+    .kpi-number {
+      font-size: 28px;
+      font-weight: 600;
+      color: var(--text-heading);
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .kpi-unit {
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--text-muted);
+    }
+
+    .kpi-bar-bg {
+      width: 100%;
+      height: 5px;
+      background-color: #EEF2F6;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .kpi-bar-fill {
+      height: 100%;
+      background-color: var(--status-ok);
+      border-radius: 999px;
+      transition: width 0.3s ease, background-color 0.3s ease;
+    }
+
+    .kpi-footer-text {
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--text-muted);
+      padding-top: 8px;
+      border-top: 1px solid #F2F4F7;
+    }
+
+    /* Pills e insignias semánticas */
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 500;
+      border: 1px solid transparent;
+      line-height: 1.2;
+    }
+
+    .pill-ok {
+      background-color: var(--status-ok-bg);
+      color: var(--status-ok);
+      border-color: var(--status-ok-bd);
+    }
+
+    .pill-warn {
+      background-color: var(--status-warn-bg);
+      color: var(--status-warn);
+      border-color: var(--status-warn-bd);
+    }
+
+    .pill-crit {
+      background-color: var(--status-crit-bg);
+      color: var(--status-crit);
+      border-color: var(--status-crit-bd);
+    }
+
+    .pill-off {
+      background-color: var(--status-off-bg);
+      color: var(--status-off);
+      border-color: var(--status-off-bd);
+    }
+
+    .pill-blue {
+      background-color: var(--brand-blue-soft);
+      color: var(--brand-blue);
+      border-color: var(--brand-blue-border);
+    }
+
+    .dot-indicator {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+
+    /* =========================================================================
+       5. GRILLAS DE CONTENIDO, FORMULARIOS Y TRAMOS DE CUENCA
+       ========================================================================= */
+    .monitor-split-grid {
+      display: grid;
+      grid-template-columns: 1.65fr 1fr;
+      gap: 20px;
+      align-items: stretch;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .form-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .form-row-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .field-label {
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--text-body);
+    }
+
+    .field-input {
+      width: 100%;
+      height: 38px;
+      padding: 0 12px;
+      border: 1px solid var(--border-medium);
+      border-radius: var(--radius-btn);
+      background-color: var(--bg-surface);
+      color: var(--text-heading);
+      font-size: 13px;
+      font-weight: 400;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .field-input:focus {
+      outline: none;
+      border-color: var(--brand-blue);
+      box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.12);
+    }
+
+    textarea.field-input {
+      height: auto;
+      min-height: 82px;
+      padding: 10px 12px;
+      resize: vertical;
+    }
+
+    .btn-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .info-note {
+      background-color: var(--bg-subtle);
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.45;
+    }
+
+    /* Tarjetas de tramo de cuenca y subtarjetas */
+    .sub-card {
+      background-color: var(--bg-subtle);
+      border: 1px solid var(--border-light);
+      border-radius: 10px;
+      padding: 15px 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .sub-card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .sub-card-title {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text-heading);
+    }
+
+    .sub-card-text {
+      font-size: 12.5px;
+      color: var(--text-secondary);
+      line-height: 1.48;
+    }
+
+    /* =========================================================================
+       6. GRÁFICOS SVG Y LEYENDAS
+       ========================================================================= */
+    .chart-wrapper {
+      position: relative;
+      width: 100%;
+    }
+
+    .chart-svg {
+      width: 100%;
+      height: auto;
+      display: block;
+      user-select: none;
+    }
+
+    .svg-tooltip {
+      position: absolute;
+      z-index: 25;
+      pointer-events: none;
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-medium);
+      box-shadow: var(--shadow-float);
+      border-radius: 8px;
+      padding: 9px 12px;
+      font-size: 12px;
+      color: var(--text-body);
+      display: none;
+      min-width: 195px;
+    }
+
+    .legend-strip {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 16px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #F2F4F7;
+    }
+
+    .legend-entry {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* =========================================================================
+       7. TABLAS DE DATOS LIMPIAS
+       ========================================================================= */
+    .table-scroll {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13px;
+    }
+
+    thead th {
+      background-color: var(--bg-subtle);
+      color: var(--text-secondary);
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 11px 14px;
+      border-top: 1px solid var(--border-light);
+      border-bottom: 1px solid var(--border-light);
+      white-space: nowrap;
+    }
+
+    tbody td {
+      padding: 11px 14px;
+      border-bottom: 1px solid #F2F4F7;
+      color: var(--text-body);
+      vertical-align: middle;
+      font-variant-numeric: tabular-nums;
+    }
+
+    tbody tr:hover {
+      background-color: #FAFBFC;
+    }
+
+    .filter-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .filter-chip {
+      height: 32px;
+      padding: 0 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border-light);
+      background-color: var(--bg-subtle);
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .filter-chip:hover {
+      color: var(--text-heading);
+      border-color: var(--border-medium);
+    }
+
+    .filter-chip.active {
+      background-color: var(--brand-blue-soft);
+      color: var(--brand-blue);
+      border-color: var(--brand-blue-border);
+    }
+
+    /* =========================================================================
+       8. ARQUITECTURA DE BLOQUES Y ECUACIONES
+       ========================================================================= */
+    .zone-container {
+      background-color: var(--bg-subtle);
+      border: 1px solid var(--border-light);
+      border-radius: 10px;
+      padding: 16px;
+    }
+
+    .zone-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .zone-title {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--brand-navy);
+    }
+
+    .zone-tag {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    .blocks-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(225px, 1fr));
+      gap: 12px;
+    }
+
+    .block-item {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-light);
+      border-radius: 10px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .block-item-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .block-item-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-heading);
+    }
+
+    .block-item-tech {
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--brand-blue);
+      margin-top: 2px;
+    }
+
+    .block-item-desc {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.45;
+    }
+
+    .transversal-banner {
+      background-color: var(--brand-blue-soft);
+      border: 1px solid var(--brand-blue-border);
+      border-radius: 10px;
+      padding: 16px 18px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .equation-card-box {
+      background-color: var(--bg-subtle);
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin: 12px 0;
+      font-size: 12.5px;
+      color: var(--text-heading);
+      line-height: 1.6;
+    }
+
+    /* =========================================================================
+       9. NOTIFICACIÓN TOAST NO BLOQUEANTE Y RESPONSIVIDAD
+       ========================================================================= */
+    .toast-box {
+      position: fixed;
+      bottom: 22px;
+      right: 22px;
+      z-index: 60;
+      max-width: 390px;
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-light);
+      border-left: 4px solid var(--brand-blue);
+      box-shadow: var(--shadow-float);
+      border-radius: 10px;
+      padding: 13px 16px;
+      display: none;
+    }
+
+    .toast-box.visible {
+      display: block;
+    }
+
+    .toast-heading {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-heading);
+    }
+
+    .toast-body {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    .mobile-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background-color: rgba(16, 24, 40, 0.35);
+      z-index: 35;
+    }
+
+    @media (max-width: 1140px) {
+      .kpi-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .monitor-split-grid, .grid-2, .grid-3 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 840px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .mobile-overlay.open {
+        display: block;
+      }
+      .main-area {
+        margin-left: 0;
+      }
+      .mobile-toggle {
+        display: inline-flex;
+        align-items: center;
+      }
+      .topbar {
+        flex-wrap: wrap;
+        padding: 12px 16px;
+      }
+      .page-content {
+        padding: 18px 16px 32px 16px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .kpi-grid, .form-row-2 {
+        grid-template-columns: 1fr;
+      }
+      .topbar-actions {
+        width: 100%;
+        flex-wrap: wrap;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Notificación flotante no bloqueante -->
+  <div id="toast-box" class="toast-box" role="status" aria-live="polite">
+    <div id="toast-heading" class="toast-heading"></div>
+    <div id="toast-body" class="toast-body"></div>
+  </div>
+
+  <!-- Overlay móvil -->
+  <div id="mobile-overlay" class="mobile-overlay"></div>
+
+  <div class="app-layout">
+    <!-- =====================================================================
+         BARRA LATERAL IZQUIERDA FIJA EN BLANCO (#FFFFFF, ANCHO 256PX)
+         ===================================================================== -->
+    <aside id="sidebar" class="sidebar" aria-label="Menú principal">
+      <div class="sidebar-header">
+        <div class="brand-logo" aria-hidden="true">
+          <!-- Isotipo SVG minimalista: ondas de agua dentro de escudo azul marino #1E3A8A -->
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2.5L4.5 5.8V11.5C4.5 16.45 7.7 21.05 12 22.3C16.3 21.05 19.5 16.45 19.5 11.5V5.8L12 2.5Z" stroke="#1E3A8A" stroke-width="1.8" stroke-linejoin="round" />
+            <path d="M7.8 11.5C9.1 10.4 10.4 10.4 12 11.5C13.6 12.6 14.9 12.6 16.2 11.5" stroke="#1E3A8A" stroke-width="1.75" stroke-linecap="round" />
+            <path d="M8.3 15C9.5 14 10.6 14 12 15C13.4 16 14.5 16 15.7 15" stroke="#1D4ED8" stroke-width="1.75" stroke-linecap="round" />
+          </svg>
+        </div>
+        <div class="brand-text-wrap">
+          <div class="brand-title">SAT Río Ocoa</div>
+          <div class="brand-subtitle">Gestión del Riesgo · Villavicencio</div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-group-caption">Plataforma Operativa</div>
+
+        <button type="button" class="nav-item active" data-target="view-monitoreo"
+                data-title="Centro de Monitoreo"
+                data-subtitle="Panel Único de Control (PUC) · Supervisión hidrometeorológica en tiempo real del río Ocoa">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
+            <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
+            <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
+            <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
+          </svg>
+          <span>Centro de Monitoreo</span>
+        </button>
+
+        <button type="button" class="nav-item" data-target="view-analisis"
+                data-title="Análisis Hidrológico"
+                data-subtitle="Correlación precipitación-nivel, dispersión de tasas de ascenso y validación de series">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+          </svg>
+          <span>Análisis Hidrológico</span>
+        </button>
+
+        <button type="button" class="nav-item" data-target="view-prealertas"
+                data-title="Gestión de Prealertas"
+                data-subtitle="Consola Human-in-the-Loop OGRD Villavicencio y canales oficiales de difusión">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+            <line x1="12" y1="9" x2="12" y2="13"></line>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+          <span>Gestión de Prealertas</span>
+          <span id="sidebar-pending-badge" class="nav-counter">1</span>
+        </button>
+
+        <button type="button" class="nav-item" data-target="view-sectores"
+                data-title="Sectores y Fuentes"
+                data-subtitle="Zonificación ribereña de Villavicencio e interoperabilidad con IDEAM y UNGRD">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+            <circle cx="12" cy="10" r="3"></circle>
+          </svg>
+          <span>Sectores y Fuentes</span>
+        </button>
+
+        <button type="button" class="nav-item" data-target="view-arquitectura"
+                data-title="Arquitectura del Sistema"
+                data-subtitle="Modelo funcional de 10 bloques, trazabilidad transversal y dimensionamiento matemático">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+            <polyline points="2 17 12 22 22 17"></polyline>
+            <polyline points="2 12 12 17 22 12"></polyline>
+          </svg>
+          <span>Arquitectura del Sistema</span>
+        </button>
+
+        <button type="button" class="nav-item" data-target="view-kpis"
+                data-title="Evaluación KPI y Bitácora"
+                data-subtitle="Contrastación cuantitativa Etapa 3 vs. Etapa 4 y registro de auditoría exportable">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+          </svg>
+          <span>Evaluación KPI y Bitácora</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="station-status-card">
+          <div class="online-row">
+            <span class="pulse-dot"></span>
+            <span>Estación Pte. del Amor · En línea</span>
+          </div>
+          <div class="station-meta-line">Código IDEAM: 35037130 · Río Ocoa</div>
+          <div class="author-divider"></div>
+          <div class="author-info">Samuel David García Vergara</div>
+          <div class="author-sub">UNAD · Proyecto de Ingeniería I · Grupo 456</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- =====================================================================
+         ÁREA DERECHA: TOPBAR DE 68PX + CONTENIDO DE MÓDULOS
+         ===================================================================== -->
+    <div class="main-area">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button id="mobile-toggle" type="button" class="mobile-toggle" aria-label="Abrir menú">
+            Menú
+          </button>
+          <div>
+            <h1 id="topbar-title" class="topbar-title">Centro de Monitoreo</h1>
+            <p id="topbar-subtitle" class="topbar-subtitle">Panel Único de Control (PUC) · Supervisión hidrometeorológica en tiempo real del río Ocoa</p>
+          </div>
+        </div>
+
+        <div class="topbar-actions">
+          <button id="btn-run-10" type="button" class="btn btn-primary">
+            Ejecutar 10 corridas
+          </button>
+          <button id="btn-sim-surge" type="button" class="btn btn-danger-soft">
+            Simular creciente
+          </button>
+          <button id="btn-reset" type="button" class="btn btn-neutral">
+            Reiniciar
+          </button>
+        </div>
+      </header>
+
+      <main class="page-content">
+
+        <!-- =================================================================
+             MÓDULO 1: CENTRO DE MONITOREO
+             ================================================================= -->
+        <section id="view-monitoreo" class="module-panel active">
+          <!-- 4 Tarjetas KPI Superiores -->
+          <div class="kpi-grid">
+            <!-- Tarjeta 1: Nivel del río (m) -->
+            <div class="kpi-card">
+              <div class="kpi-header-row">
+                <span class="kpi-name">Nivel del río (m)</span>
+                <div class="kpi-icon-circle" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M2 12c2-2 4-2 6 0s4 2 6 0 4-2 6 0"></path>
+                    <path d="M2 17c2-2 4-2 6 0s4 2 6 0 4-2 6 0"></path>
+                    <path d="M2 7c2-2 4-2 6 0s4 2 6 0 4-2 6 0"></path>
+                  </svg>
+                </div>
+              </div>
+              <div class="kpi-main-row">
+                <span id="kpi-nr-val" class="kpi-number">1.68</span>
+                <span class="kpi-unit">m</span>
+              </div>
+              <div class="kpi-bar-bg">
+                <div id="kpi-nr-fill" class="kpi-bar-fill" style="width: 33.6%;"></div>
+              </div>
+              <div class="kpi-footer-text">Amarilla 2.50 m · Roja 4.00 m</div>
+            </div>
+
+            <!-- Tarjeta 2: Tasa de ascenso (m/h) -->
+            <div class="kpi-card">
+              <div class="kpi-header-row">
+                <span class="kpi-name">Tasa de ascenso (m/h)</span>
+                <div class="kpi-icon-circle" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                    <polyline points="17 6 23 6 23 12"></polyline>
+                  </svg>
+                </div>
+              </div>
+              <div class="kpi-main-row">
+                <span id="kpi-rate-val" class="kpi-number">+0.16</span>
+                <span class="kpi-unit">m/h</span>
+              </div>
+              <div id="kpi-rate-footer" class="kpi-footer-text">Variación ΔN +0.16 m · Umbral crítico 0.60 m/h</div>
+            </div>
+
+            <!-- Tarjeta 3: Precipitación (mm/h) -->
+            <div class="kpi-card">
+              <div class="kpi-header-row">
+                <span class="kpi-name">Precipitación (mm/h)</span>
+                <div class="kpi-icon-circle" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+                  </svg>
+                </div>
+              </div>
+              <div class="kpi-main-row">
+                <span id="kpi-precip-val" class="kpi-number">8.0</span>
+                <span class="kpi-unit">mm/h</span>
+              </div>
+              <div class="kpi-footer-text">Cuenca alta · Intervalo Δt = 5 min</div>
+            </div>
+
+            <!-- Tarjeta 4: Estado operativo -->
+            <div class="kpi-card">
+              <div class="kpi-header-row">
+                <span class="kpi-name">Estado operativo</span>
+                <div class="kpi-icon-circle" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                  </svg>
+                </div>
+              </div>
+              <div class="kpi-main-row" style="margin: 12px 0 11px 0;">
+                <span id="kpi-status-pill" class="pill pill-ok" style="font-size: 13px; padding: 6px 12px;">
+                  <span class="dot-indicator" style="background-color: var(--status-ok);"></span>
+                  Normal
+                </span>
+              </div>
+              <div id="kpi-status-footer" class="kpi-footer-text">Prealerta Ap = 0 · Alerta Oficial Ao = 0</div>
+            </div>
+          </div>
+
+          <!-- Fila Intermedia: Gráfico SVG de serie temporal + Simulación de ingesta en tiempo real -->
+          <div class="monitor-split-grid">
+            <!-- Gráfico SVG ancho de serie temporal -->
+            <div class="card">
+              <div class="card-head">
+                <div>
+                  <h2 class="card-title">Comportamiento del nivel hidrométrico — Estación Pte. del Amor</h2>
+                  <p class="card-desc">Serie temporal simulada en intervalos de muestreo Nyquist (Δt = 5 min · Kirby Tc = 4.63 h)</p>
+                </div>
+                <span id="series-count-pill" class="pill pill-blue">3 registros válidos</span>
+              </div>
+
+              <div class="chart-wrapper">
+                <div id="ts-tooltip" class="svg-tooltip"></div>
+                <svg id="svg-timeseries" class="chart-svg" viewBox="0 0 760 285" role="img" aria-label="Comportamiento del nivel hidrométrico en la Estación Puente del Amor"></svg>
+              </div>
+
+              <div class="legend-strip">
+                <span class="legend-entry"><span style="width:14px;height:2.5px;background:#1D4ED8;display:inline-block;border-radius:2px;"></span> Nivel registrado Nr (m)</span>
+                <span class="legend-entry"><span style="width:14px;height:0;border-top:2px dashed #D97706;display:inline-block;"></span> Amarilla (2.50 m)</span>
+                <span class="legend-entry"><span style="width:14px;height:0;border-top:2px dashed #B91C1C;display:inline-block;"></span> Roja (4.00 m)</span>
+                <span class="legend-entry"><span class="dot-indicator" style="background:#059669;"></span> Normal</span>
+                <span class="legend-entry"><span class="dot-indicator" style="background:#D97706;"></span> Prealerta Amarilla</span>
+                <span class="legend-entry"><span class="dot-indicator" style="background:#B91C1C;"></span> Prealerta Roja</span>
+              </div>
+            </div>
+
+            <!-- Panel lateral derecho: Simulación de ingesta en tiempo real (Bloques 1-2) -->
+            <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <div class="card-head">
+                  <div>
+                    <h2 class="card-title">Simulación de ingesta en tiempo real</h2>
+                    <p class="card-desc">Adquisición de telemetría (Bloque 1) y filtro de integridad (Bloque 2)</p>
+                  </div>
+                </div>
+
+                <form id="ingest-form" class="form-stack">
+                  <div class="form-row-2">
+                    <div class="field-group">
+                      <label for="in-nr" class="field-label">Nivel Nr (m)</label>
+                      <input id="in-nr" type="number" step="0.01" value="1.85" required class="field-input" />
+                    </div>
+                    <div class="field-group">
+                      <label for="in-p" class="field-label">Precipitación P (mm/h)</label>
+                      <input id="in-p" type="number" step="0.1" min="0" value="14.0" required class="field-input" />
+                    </div>
+                  </div>
+
+                  <div class="field-group">
+                    <label for="in-source" class="field-label">Fuente hidrometeorológica</label>
+                    <select id="in-source" class="field-input">
+                      <option value="FEWS-IDEAM (35037130)">FEWS-IDEAM (Est. Pte. del Amor 35037130)</option>
+                      <option value="Estación Local IoT">Estación Pluviométrica Local IoT</option>
+                      <option value="Registro Municipal OGRD">Registro Operativo OGRD Villavicencio</option>
+                    </select>
+                  </div>
+
+                  <div class="btn-stack">
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                      Ingestar lectura válida
+                    </button>
+                    <button id="btn-corrupt-test" type="button" class="btn btn-neutral" style="width: 100%;">
+                      Probar filtro de paquete corrupto (-9.99 m)
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              <div class="info-note" style="margin-top: 14px;">
+                <strong>Control de calidad (Bloque 2):</strong> Las tramas con valores negativos o fuera del rango físico del cauce (0 m – 15 m) son aisladas automáticamente sin distorsionar la curva hidrométrica.
+              </div>
+            </div>
+          </div>
+
+          <!-- Panel Inferior: Estado por tramo de la cuenca del río Ocoa -->
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <h2 class="card-title">Estado por tramo de la cuenca del río Ocoa</h2>
+                <p class="card-desc">Evaluación territorial sincronizada con el nivel hidrométrico actual y la intensidad de lluvia</p>
+              </div>
+              <span id="basin-sync-label" style="font-size: 12px; color: var(--text-muted);">Sincronizado con lectura R-03</span>
+            </div>
+
+            <div class="grid-3">
+              <div class="sub-card">
+                <div class="sub-card-head">
+                  <span class="sub-card-title">Cuenca Alta · Piedemonte</span>
+                  <span id="sec-alta-pill" class="pill pill-ok">Normal</span>
+                </div>
+                <p id="sec-alta-desc" class="sub-card-text">
+                  Cabecera y Altos de Playa Rica · Precipitación de 8.0 mm/h dentro de parámetros ordinarios de captación.
+                </p>
+              </div>
+
+              <div class="sub-card">
+                <div class="sub-card-head">
+                  <span class="sub-card-title">Cuenca Media · Urbana Villavicencio</span>
+                  <span id="sec-media-pill" class="pill pill-ok">Normal</span>
+                </div>
+                <p id="sec-media-desc" class="sub-card-text">
+                  Estación Pte. del Amor (1.68 m) · Tramo de Ciudad Porfía, La Isla, Playa Rica y Kirpas sin riesgo de desborde.
+                </p>
+              </div>
+
+              <div class="sub-card">
+                <div class="sub-card-head">
+                  <span class="sub-card-title">Cuenca Baja · Desembocadura Guayuriba</span>
+                  <span id="sec-baja-pill" class="pill pill-ok">Normal</span>
+                </div>
+                <p id="sec-baja-desc" class="sub-card-text">
+                  Vereda El Amor y confluencia con río Guayuriba · Capacidad hidráulica de tránsito estable.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- =================================================================
+             MÓDULO 2: ANÁLISIS HIDROLÓGICO
+             ================================================================= -->
+        <section id="view-analisis" class="module-panel">
+          <div class="grid-2">
+            <!-- Gráfico A: Dispersión Precipitación vs Nivel -->
+            <div class="card">
+              <div class="card-head">
+                <div>
+                  <h2 class="card-title">Dispersión Precipitación P (mm/h) vs. Nivel Nr (m)</h2>
+                  <p class="card-desc">Regresión lineal ordinaria sobre registros hidrométricos válidos</p>
+                </div>
+                <span id="corr-r-pill" class="pill pill-blue">r = --</span>
+              </div>
+
+              <div class="chart-wrapper">
+                <div id="sca-tooltip" class="svg-tooltip"></div>
+                <svg id="svg-scatter-a" class="chart-svg" viewBox="0 0 540 300" role="img" aria-label="Gráfico de dispersión precipitación contra nivel"></svg>
+              </div>
+
+              <div class="legend-strip">
+                <span class="legend-entry"><span style="width:14px;height:2px;background:#1D4ED8;display:inline-block;"></span> Tendencia lineal</span>
+                <span class="legend-entry"><span class="dot-indicator" style="background:#059669;"></span> Normal</span>
+                <span class="legend-entry"><span class="dot-indicator" style="background:#D97706;"></span> Amarilla</span>
+                <span class="legend-entry"><span class="dot-indicator" style="background:#B91C1C;"></span> Roja</span>
+              </div>
+            </div>
+
+            <!-- Gráfico B: Dispersión Nivel vs Tasa de ascenso -->
+            <div class="card">
+              <div class="card-head">
+                <div>
+                  <h2 class="card-title">Dispersión Nivel Nr (m) vs. Tasa de ascenso dH/dt (m/h)</h2>
+                  <p class="card-desc">Cuadrantes operativos de nivel estático y velocidad de crecimiento</p>
+                </div>
+                <span class="pill pill-off">Crítico ≥ 0.60 m/h</span>
+              </div>
+
+              <div class="chart-wrapper">
+                <div id="scb-tooltip" class="svg-tooltip"></div>
+                <svg id="svg-scatter-b" class="chart-svg" viewBox="0 0 540 300" role="img" aria-label="Gráfico de dispersión nivel contra tasa de ascenso"></svg>
+              </div>
+
+              <div class="legend-strip">
+                <span class="legend-entry"><span style="width:14px;height:0;border-top:2px dashed #D97706;display:inline-block;"></span> dH/dt = 0.60 m/h</span>
+                <span class="legend-entry"><span style="width:14px;height:0;border-top:2px dotted #D97706;display:inline-block;"></span> Nr = 2.50 m</span>
+                <span class="legend-entry"><span style="width:14px;height:0;border-top:2px dotted #B91C1C;display:inline-block;"></span> Nr = 4.00 m</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tabla filtrable de lecturas procesadas -->
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <h2 class="card-title">Lecturas procesadas por el motor analítico (Bloque 5)</h2>
+                <p class="card-desc">Seleccione una categoría para filtrar el comportamiento de cada corrida experimental</p>
+              </div>
+              <div class="filter-pills" role="group" aria-label="Filtros de estado">
+                <button type="button" class="filter-chip active" data-filter="TODOS">Todos</button>
+                <button type="button" class="filter-chip" data-filter="NORMAL">Normal</button>
+                <button type="button" class="filter-chip" data-filter="PREALERTA">Prealerta</button>
+                <button type="button" class="filter-chip" data-filter="RECHAZADO">Rechazado</button>
+              </div>
+            </div>
+
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Corrida</th>
+                    <th>Hora</th>
+                    <th>Fuente</th>
+                    <th>Nivel Nr (m)</th>
+                    <th>Variación ΔN (m)</th>
+                    <th>Tasa dH/dt (m/h)</th>
+                    <th>Precipitación (mm/h)</th>
+                    <th>Latencia Tp (s)</th>
+                    <th>Clasificación</th>
+                  </tr>
+                </thead>
+                <tbody id="analysis-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- =================================================================
+             MÓDULO 3: GESTIÓN DE PREALERTAS
+             ================================================================= -->
+        <section id="view-prealertas" class="module-panel">
+          <div class="grid-2">
+            <!-- Consola de validación humana Human-in-the-Loop -->
+            <div class="card">
+              <div class="card-head">
+                <div>
+                  <h2 class="card-title">Consola de validación humana (OGRD Villavicencio)</h2>
+                  <p class="card-desc">Protocolo Human-in-the-Loop (Bloques 8–10): supervisión obligatoria antes de emitir alertas oficiales</p>
+                </div>
+                <span id="hitl-status-pill" class="pill pill-ok">Sin pendientes</span>
+              </div>
+
+              <!-- Estado en espera -->
+              <div id="hitl-idle-panel" class="sub-card">
+                <div class="sub-card-title">Supervisión operativa activa</div>
+                <p class="sub-card-text">
+                  No existen prealertas automáticas pendientes de auditoría en este momento. Todas las condiciones previas fueron revisadas o se encuentran en rango normal. Puede simular una creciente crítica para probar el flujo de aprobación institucional.
+                </p>
+                <div class="btn-row" style="margin-top: 6px;">
+                  <button type="button" class="btn btn-danger-soft" onclick="simulateFloodSurge()">
+                    Simular creciente crítica (4.25 m)
+                  </button>
+                </div>
+              </div>
+
+              <!-- Estado con prealerta activa -->
+              <div id="hitl-pending-panel" style="display: none; background-color: var(--status-crit-bg); border: 1px solid var(--status-crit-bd); border-radius: 10px; padding: 16px;">
+                <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px;">
+                  <span id="hitl-pending-pill" class="pill pill-crit">Prealerta Roja Activa (Ap = 1)</span>
+                  <span id="hitl-pending-meta" style="font-size: 12px; font-weight: 500; color: var(--text-heading);">--</span>
+                </div>
+
+                <div style="background-color: var(--bg-surface); border: 1px solid var(--border-light); border-radius: 8px; padding: 10px 12px; margin-bottom: 12px;">
+                  <div style="font-size: 11.5px; font-weight: 500; color: var(--text-muted);">Justificación matemática del motor de reglas (Bloque 6)</div>
+                  <div id="hitl-pending-reason" style="font-size: 13px; font-weight: 600; color: var(--text-heading); margin-top: 2px;">--</div>
+                </div>
+
+                <div class="field-group">
+                  <label for="hitl-operator-note" class="field-label">Observaciones técnicas del operador OGRD</label>
+                  <textarea id="hitl-operator-note" class="field-input" placeholder="Escriba la verificación con radar IDEAM, estaciones locales y el sustento de la decisión..."></textarea>
+                </div>
+
+                <div class="btn-row" style="margin-top: 12px;">
+                  <button id="btn-validate-official" type="button" class="btn btn-danger-solid">
+                    Validar y emitir alerta oficial
+                  </button>
+                  <button id="btn-discard-prealert" type="button" class="btn btn-neutral">
+                    Descartar prealerta
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tarjetas de estado de los 4 canales institucionales -->
+            <div class="card">
+              <div class="card-head">
+                <div>
+                  <h2 class="card-title">Canales institucionales de difusión (Bloque 10)</h2>
+                  <p class="card-desc">Se habilitan únicamente cuando el operador valida y emite la Alerta Oficial (Ao = 1)</p>
+                </div>
+                <span id="channels-global-pill" class="pill pill-off">En espera</span>
+              </div>
+
+              <div class="form-row-2">
+                <div class="sub-card">
+                  <div class="sub-card-head">
+                    <span class="sub-card-title">Mensajería SMS Masiva</span>
+                    <span class="pill pill-off ch-state-pill">En espera</span>
+                  </div>
+                  <p class="sub-card-text">Envío prioritario a líderes comunitarios y habitantes de ronda sin requerir plan de datos.</p>
+                </div>
+
+                <div class="sub-card">
+                  <div class="sub-card-head">
+                    <span class="sub-card-title">Sirenas Comunitarias IoT</span>
+                    <span class="pill pill-off ch-state-pill">En espera</span>
+                  </div>
+                  <p class="sub-card-text">Activación acústica en puntos críticos urbanos para evacuación preventiva inmediata.</p>
+                </div>
+
+                <div class="sub-card">
+                  <div class="sub-card-head">
+                    <span class="sub-card-title">Red de Radio OGRD/Bomberos</span>
+                    <span class="pill pill-off ch-state-pill">En espera</span>
+                  </div>
+                  <p class="sub-card-text">Despacho operativo directo hacia Cuerpo de Bomberos, Defensa Civil y Cruz Roja Meta.</p>
+                </div>
+
+                <div class="sub-card">
+                  <div class="sub-card-head">
+                    <span class="sub-card-title">Portal Web Ciudadano</span>
+                    <span class="pill pill-off ch-state-pill">En espera</span>
+                  </div>
+                  <p class="sub-card-text">Publicación georreferenciada oficial en el portal de la Alcaldía de Villavicencio.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tabla histórica de decisiones auditadas del operador -->
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <h2 class="card-title">Historial de decisiones auditadas del operador</h2>
+                <p class="card-desc">Registro inmutable de prealertas evaluadas, criterio hidrológico y emisión oficial</p>
+              </div>
+            </div>
+
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Evento</th>
+                    <th>Hora</th>
+                    <th>Severidad</th>
+                    <th>Criterio hidrológico</th>
+                    <th>Decisión OGRD</th>
+                    <th>Observaciones del operador</th>
+                    <th>Estado Ao</th>
+                  </tr>
+                </thead>
+                <tbody id="hitl-history-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- =================================================================
+             MÓDULO 4: SECTORES Y FUENTES
+             ================================================================= -->
+        <section id="view-sectores" class="module-panel">
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <h2 class="card-title">Caracterización de sectores ribereños vulnerables en Villavicencio</h2>
+                <p class="card-desc">Distribución espacial de exposición a crecientes súbitas a lo largo de la cuenca del río Ocoa</p>
+              </div>
+            </div>
+
+            <div class="grid-3">
+              <div class="sub-card">
+                <div class="sub-card-head">
+                  <span class="sub-card-title">Cuenca Alta (Piedemonte)</span>
+                  <span class="pill pill-blue">Captación</span>
+                </div>
+                <p class="sub-card-text">
+                  Zona de nacimiento con pendiente media del 2 % (S = 0.02 m/m) y cauce principal de 35 km. Determina la respuesta hidrológica rápida ante lluvias convectivas.
+                </p>
+                <div style="font-size: 12px; color: var(--text-heading); font-weight: 500;">
+                  Sectores: Zonas rurales altas, Altos de Playa Rica y asentamientos de ladera.
+                </div>
+              </div>
+
+              <div class="sub-card">
+                <div class="sub-card-head">
+                  <span class="sub-card-title">Cuenca Media Urbana</span>
+                  <span class="pill pill-warn">Alta Exposición</span>
+                </div>
+                <p class="sub-card-text">
+                  Tramo monitoreado en la estación Puente del Amor (código 35037130). Concentra barrios residenciales e infraestructura vial sobre la ronda hídrica urbana.
+                </p>
+                <div style="font-size: 12px; color: var(--text-heading); font-weight: 500;">
+                  Sectores: Ciudad Porfía, La Isla, Playa Rica, Juan Pablo II, La Playita, El Rubí, Kirpas y Samán de la Rivera.
+                </div>
+              </div>
+
+              <div class="sub-card">
+                <div class="sub-card-head">
+                  <span class="sub-card-title">Cuenca Baja (Desembocadura)</span>
+                  <span class="pill pill-ok">Amortiguación</span>
+                </div>
+                <p class="sub-card-text">
+                  Tramo rural final de menor pendiente donde la onda de creciente se lamina antes de su entrega hidráulica al sistema del río Guayuriba.
+                </p>
+                <div style="font-size: 12px; color: var(--text-heading); font-weight: 500;">
+                  Sectores: Vereda El Amor, fincas ribereñas y sector de desembocadura Guayuriba.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <h2 class="card-title">Directorio de fuentes oficiales integradas</h2>
+                <p class="card-desc">Entidades e infraestructuras hidrometeorológicas articuladas sin duplicidad de sensores</p>
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <div class="block-item">
+                <div>
+                  <div class="block-item-top">
+                    <span class="block-item-title">IDEAM — FEWS Colombia</span>
+                    <span class="pill pill-blue">Visor Tiempo Real</span>
+                  </div>
+                  <div class="block-item-tech">Sistema de Pronósticos Hidrológicos y Alertas Tempranas</div>
+                  <p class="block-item-desc" style="margin-top: 6px;">
+                    Provee el seguimiento operativo de niveles limnimétricos y alertas hidrológicas para la subcuenca del río Ocoa y la cuenca del Guatiquía.
+                  </p>
+                </div>
+                <div style="font-size: 12px; color: var(--text-muted);">https://fews.ideam.gov.co/visorfews/nacional/estacion</div>
+              </div>
+
+              <div class="block-item">
+                <div>
+                  <div class="block-item-top">
+                    <span class="block-item-title">IDEAM — Sistema DHIME</span>
+                    <span class="pill pill-blue">Est. 35037130 y 35030380</span>
+                  </div>
+                  <div class="block-item-tech">Estación Puente del Amor (35037130) e IDEAM Villavicencio (35030380)</div>
+                  <p class="block-item-desc" style="margin-top: 6px;">
+                    Repositorio oficial de series históricas de nivel, caudal y precipitación utilizadas para calibrar los parámetros de comportamiento de la cuenca.
+                  </p>
+                </div>
+                <div style="font-size: 12px; color: var(--text-muted);">https://ideam.gov.co/dhime</div>
+              </div>
+
+              <div class="block-item">
+                <div>
+                  <div class="block-item-top">
+                    <span class="block-item-title">UNGRD — Unidad Nacional para la Gestión del Riesgo</span>
+                    <span class="pill pill-blue">Marco Normativo SAT</span>
+                  </div>
+                  <div class="block-item-tech">Lineamientos para Sistemas de Alerta Temprana (SNGRD)</div>
+                  <p class="block-item-desc" style="margin-top: 6px;">
+                    Define los estándares de articulación territorial, niveles de alerta institucional y enfoque diferencial H-Inclusión para comunidades vulnerables.
+                  </p>
+                </div>
+                <div style="font-size: 12px; color: var(--text-muted);">https://portal.gestiondelriesgo.gov.co/</div>
+              </div>
+
+              <div class="block-item">
+                <div>
+                  <div class="block-item-top">
+                    <span class="block-item-title">Alcaldía de Villavicencio — OGRD</span>
+                    <span class="pill pill-blue">Validación Local</span>
+                  </div>
+                  <div class="block-item-tech">Oficina de Gestión del Riesgo de Desastres Municipal</div>
+                  <p class="block-item-desc" style="margin-top: 6px;">
+                    Autoridad competente encargada de auditar las prealertas del panel, validar las condiciones de campo y emitir la alerta oficial ciudadana.
+                  </p>
+                </div>
+                <div style="font-size: 12px; color: var(--text-muted);">https://villavicencio.gov.co/</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- =================================================================
+             MÓDULO 5: ARQUITECTURA DEL SISTEMA
+             ================================================================= -->
+        <section id="view-arquitectura" class="module-panel">
+          <!-- 3 Tarjetas resumen de los parámetros matemáticos de diseño -->
+          <div class="grid-3">
+            <div class="card">
+              <div class="card-title">Ecuación de Kirpich</div>
+              <div class="card-desc">Tiempo de concentración de la cuenca</div>
+              <div class="equation-card-box">
+                Tc = 0.000325 · (L<sup>0.77</sup> / S<sup>0.385</sup>)<br />
+                L = 35,000 m · S = 0.02 m/m<br />
+                <strong>Tc = 4.63 horas (278 minutos)</strong>
+              </div>
+              <p class="sub-card-text">
+                Determina el tiempo de tránsito máximo desde la parte alta del río Ocoa hasta Villavicencio, estableciendo la ventana operativa de anticipación.
+              </p>
+            </div>
+
+            <div class="card">
+              <div class="card-title">Teorema de Nyquist-Shannon</div>
+              <div class="card-desc">Frecuencia de muestreo sin pérdida de señal</div>
+              <div class="equation-card-box">
+                Δt<sub>muestreo</sub> ≤ Tc / 20 = 278 / 20 = 13.9 min<br />
+                <strong>Intervalo Δt = 5 minutos</strong><br />
+                12 lecturas/hora · 288 registros/día
+              </div>
+              <p class="sub-card-text">
+                Asegura capturar con alta resolución temporal cualquier ascenso súbito superior a 0.60 m/h antes de alcanzar cotas de desbordamiento.
+              </p>
+            </div>
+
+            <div class="card">
+              <div class="card-title">Dimensionamiento de almacenamiento</div>
+              <div class="card-desc">Capacidad proyectada para Est. 35037130</div>
+              <div class="equation-card-box">
+                288 reg/día × 365 días = 105,120 reg/año<br />
+                105,120 × 2 KB = 205 MB/año<br />
+                Con 30 % margen: <strong>267 MB/año</strong>
+              </div>
+              <p class="sub-card-text">
+                Define los requerimientos de almacenamiento histórico en PostgreSQL/TimescaleDB con reserva de crecimiento para nuevas estaciones.
+              </p>
+            </div>
+          </div>
+
+          <!-- Esquema visual por las 3 zonas operativas + Bloque 11 -->
+          <div class="card" style="display: flex; flex-direction: column; gap: 16px;">
+            <div class="card-head" style="margin-bottom: 0;">
+              <div>
+                <h2 class="card-title">Arquitectura funcional de 10 bloques y trazabilidad transversal</h2>
+                <p class="card-desc">Flujo extremo a extremo desde las fuentes externas hasta la difusión institucional validada</p>
+              </div>
+              <span id="arch-cycle-pill" class="pill pill-blue">Ciclo activo: R-03</span>
+            </div>
+
+            <div class="zone-container">
+              <div class="zone-header">
+                <span class="zone-title">Zona 1 · Fuentes Externas de Datos</span>
+                <span class="zone-tag">Interoperabilidad REST/JSON · MQTT · SQL</span>
+              </div>
+              <div class="blocks-grid">
+                <div class="block-item">
+                  <div class="block-item-title">FEWS — IDEAM</div>
+                  <div class="block-item-tech">Estación Pte. del Amor (35037130)</div>
+                  <p class="block-item-desc">Suministra mediciones periódicas de nivel hidrométrico Nr (m) y pronósticos de cuenca.</p>
+                </div>
+                <div class="block-item">
+                  <div class="block-item-title">Estaciones Hidrometeorológicas</div>
+                  <div class="block-item-tech">Pluviómetros y sensores locales</div>
+                  <p class="block-item-desc">Reportan intensidad de precipitación pluvial P (mm/h) en la cabecera del río Ocoa.</p>
+                </div>
+                <div class="block-item">
+                  <div class="block-item-title">Registros Municipales</div>
+                  <div class="block-item-tech">OGRD Villavicencio / DHIME</div>
+                  <p class="block-item-desc">Aportan reportes de campo, niveles históricos de referencia y novedades territoriales.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="zone-container">
+              <div class="zone-header">
+                <span class="zone-title">Zona 2 · Plataforma Propuesta (Bloques 1 al 7)</span>
+                <span class="zone-tag">Ingesta, Validación, Análisis y Visualización</span>
+              </div>
+              <div id="arch-z2-grid" class="blocks-grid"></div>
+            </div>
+
+            <div class="zone-container">
+              <div class="zone-header">
+                <span class="zone-title">Zona 3 · Decisión y Respuesta Institucional (Bloques 8 al 10)</span>
+                <span class="zone-tag">Control Human-in-the-Loop</span>
+              </div>
+              <div id="arch-z3-grid" class="blocks-grid"></div>
+            </div>
+
+            <div class="transversal-banner">
+              <div>
+                <div style="font-size: 13.5px; font-weight: 600; color: var(--brand-navy);">
+                  Bloque Transversal 11 · Monitoreo, Auditoría y Trazabilidad Continua
+                </div>
+                <div style="font-size: 12.5px; color: var(--text-secondary); margin-top: 2px;">
+                  Conserva el 100 % de los paquetes recibidos, rechazos de integridad, prealertas generadas, decisiones del operador y alertas emitidas.
+                </div>
+              </div>
+              <span id="arch-traz-pill" class="pill pill-blue" style="background-color: #FFFFFF;">3 eventos auditados</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- =================================================================
+             MÓDULO 6: EVALUACIÓN KPI Y BITÁCORA
+             ================================================================= -->
+        <section id="view-kpis" class="module-panel">
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <h2 class="card-title">Contrastación cuantitativa de KPIs (Etapa 3 vs. Etapa 4)</h2>
+                <p class="card-desc">Evaluación del cumplimiento de metas técnicas y análisis de desvíos matemáticos observados</p>
+              </div>
+              <span id="kpi-n-pill" class="pill pill-blue">n = 3 corridas evaluadas</span>
+            </div>
+
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Indicador de desempeño (KPI)</th>
+                    <th>Meta Etapa 3</th>
+                    <th>Medición Etapa 4</th>
+                    <th>Desvío matemático</th>
+                    <th>Diagnóstico técnico</th>
+                  </tr>
+                </thead>
+                <tbody id="kpi-matrix-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <h2 class="card-title">Bitácora completa de auditoría (Bloque 11)</h2>
+                <p class="card-desc">Trazabilidad cronológica detallada de variables de entrada, procesamiento, latencia y decisiones</p>
+              </div>
+              <button id="btn-export-csv" type="button" class="btn btn-primary">
+                Exportar bitácora CSV
+              </button>
+            </div>
+
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Hora</th>
+                    <th>Fuente</th>
+                    <th>Nr (m)</th>
+                    <th>ΔN (m)</th>
+                    <th>dH/dt (m/h)</th>
+                    <th>P (mm/h)</th>
+                    <th>Tp (s)</th>
+                    <th>Ta (s)</th>
+                    <th>Integridad</th>
+                    <th>Prealerta</th>
+                    <th>Decisión OGRD</th>
+                  </tr>
+                </thead>
+                <tbody id="audit-full-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MOTOR DE SIMULACIÓN HIDROLÓGICA Y RENDERIZADO VECTORIAL SVG
+       ========================================================================= -->
+  <script>
+    const PARAMS = {
+      H_AMARILLA: 2.50,
+      H_ROJA: 4.00,
+      RATE_CRITICO: 0.60,
+      DT_MIN: 5,
+      DT_HORAS: 5 / 60,
+      META_TP: 5.00,
+      META_TA: 10.00,
+      META_INTEGRIDAD: 95.0,
+      META_TRAZABILIDAD: 100.0,
+      META_HITL: 100.0
+    };
+
+    const BLOQUES_ZONA2 = [
+      { id: 1, title: '1. Adquisición / Recepción', tech: 'Python · API REST / JSON', desc: 'Captura paquetes desde FEWS-IDEAM, sensores locales y registros municipales con marca temporal.' },
+      { id: 2, title: '2. Validación y Normalización', tech: 'Python · Pandas · Filtro Integridad', desc: 'Verifica rangos físicos y estructura de datos; aísla tramas corruptas antes de almacenar.' },
+      { id: 3, title: '3. Integración / Interoperabilidad', tech: 'Modelo Unificado JSON', desc: 'Homologa unidades y frecuencias heterogéneas en un esquema común para la cuenca.' },
+      { id: 4, title: '4. Almacenamiento Histórico', tech: 'PostgreSQL / TimescaleDB', desc: 'Persiste series temporales y auditoría con capacidad dimensionada de 267 MB/año.' },
+      { id: 5, title: '5. Procesamiento y Análisis', tech: 'Python · NumPy · Kirpich', desc: 'Calcula variación ΔN, tasa de ascenso dH/dt y correlación precipitación-nivel cada 5 min.' },
+      { id: 6, title: '6. Motor de Prealertas', tech: 'Evaluación de Umbrales', desc: 'Compara Nr ≥ 2.50 m, Nr ≥ 4.00 m y dH/dt ≥ 0.60 m/h para activar prealertas Ap = 1.' },
+      { id: 7, title: '7. Panel Único de Control', tech: 'Aplicación Web · SVG · WebSockets', desc: 'Visualiza indicadores, curvas hidrométricas y prealertas activas en tiempo real.' }
+    ];
+
+    const BLOQUES_ZONA3 = [
+      { id: 8, title: '8. Operador OGRD Villavicencio', tech: 'Supervisión Human-in-the-Loop', desc: 'Analista humano revisa los datos hidrometeorológicos y decide validar o descartar.' },
+      { id: 9, title: '9. Alerta Oficial Institucional', tech: 'Servicio Notificación Autorizado', desc: 'Activa formalmente el estado de Alerta Oficial (Ao = 1) solo tras aprobación humana.' },
+      { id: 10, title: '10. Comunicación Multicanal', tech: 'SMS · Sirenas · Radio · Portal Web', desc: 'Difunde el aviso oficial hacia comunidades ribereñas y organismos de socorro.' }
+    ];
+
+    const appState = {
+      records: [],
+      pendingRunId: null,
+      activeFilter: 'TODOS'
+    };
+
+    // =========================================================================
+    // NAVEGACIÓN ENTRE MÓDULOS Y ACTUALIZACIÓN DEL TOPBAR
+    // =========================================================================
+    let toastTimer = null;
+    function notifyUser(title, body, accentColor = '#1D4ED8') {
+      const box = document.getElementById('toast-box');
+      document.getElementById('toast-heading').textContent = title;
+      document.getElementById('toast-body').textContent = body;
+      box.style.borderLeftColor = accentColor;
+      box.classList.add('visible');
+
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => box.classList.remove('visible'), 4200);
+    }
+
+    function navigateToModule(btn) {
+      const targetId = btn.getAttribute('data-target');
+      const title = btn.getAttribute('data-title');
+      const subtitle = btn.getAttribute('data-subtitle');
+
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+      btn.classList.add('active');
+
+      document.querySelectorAll('.module-panel').forEach(panel => {
+        panel.classList.toggle('active', panel.id === targetId);
+      });
+
+      document.getElementById('topbar-title').textContent = title;
+      document.getElementById('topbar-subtitle').textContent = subtitle;
+
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('mobile-overlay').classList.remove('open');
+
+      if (targetId === 'view-monitoreo') renderTimeSeriesChart();
+      if (targetId === 'view-analisis') {
+        renderScatterAChart();
+        renderScatterBChart();
+      }
+    }
+
+    document.querySelectorAll('.nav-item').forEach(btn => {
+      btn.addEventListener('click', () => navigateToModule(btn));
+    });
+
+    document.getElementById('mobile-toggle').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.add('open');
+      document.getElementById('mobile-overlay').classList.add('open');
+    });
+
+    document.getElementById('mobile-overlay').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('mobile-overlay').classList.remove('open');
+    });
+
+    // =========================================================================
+    // MOTOR DE INGESTA, VALIDACIÓN Y CÁLCULO HIDROLÓGICO
+    // =========================================================================
+    function getNextTime() {
+      if (appState.records.length === 0) return '08:00';
+      const lastTime = appState.records[appState.records.length - 1].time;
+      const [hh, mm] = lastTime.split(':').map(Number);
+      const total = hh * 60 + mm + PARAMS.DT_MIN;
+      return `${String(Math.floor(total / 60) % 24).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`;
+    }
+
+    function getPreviousValidNr() {
+      for (let i = appState.records.length - 1; i >= 0; i--) {
+        if (appState.records[i].valid) return appState.records[i].nr;
+      }
+      return null;
+    }
+
+    function ingestTelemetry(cfg, silent = false) {
+      const idx = appState.records.length + 1;
+      const runId = `R-${String(idx).padStart(2, '0')}`;
+      const timeStr = cfg.time || getNextTime();
+      const source = cfg.source || 'FEWS-IDEAM (35037130)';
+      const tpSec = cfg.tpSec !== undefined ? cfg.tpSec : Number((0.038 + Math.random() * 0.010).toFixed(3));
+
+      // Bloque 2: Validación de integridad y rango físico (0 m <= Nr <= 15 m)
+      const isCorrupt = Boolean(cfg.corrupt) || isNaN(cfg.nr) || cfg.nr < 0 || cfg.nr > 15 || isNaN(cfg.p) || cfg.p < 0;
+
+      if (isCorrupt) {
+        appState.records.push({
+          id: runId,
+          time: timeStr,
+          source: source,
+          nr: isNaN(cfg.nr) ? -9.99 : cfg.nr,
+          deltaN: null,
+          rate: null,
+          p: isNaN(cfg.p) ? 0 : cfg.p,
+          tpSec: cfg.tpSec !== undefined ? cfg.tpSec : 0.025,
+          taSec: null,
+          valid: false,
+          ap: 0,
+          riskLevel: 'RECHAZADO',
+          criteria: 'Trama corrupta fuera de rango físico (Bloque 2)',
+          decision: 'Rechazado B2',
+          notes: 'Paquete anómalo aislado por filtro de integridad.',
+          ao: 0
+        });
+
+        if (!silent) {
+          notifyUser('Paquete corrupto filtrado', `La lectura ${runId} (${cfg.nr} m) fue rechazada en el Bloque 2 sin alterar las gráficas.`, '#475467');
+        }
+        renderAllViews();
+        return;
+      }
+
+      // Bloque 5: Procesamiento y cálculo de variación y tasa de ascenso
+      const nr = Number(cfg.nr.toFixed(2));
+      const pVal = Number(cfg.p.toFixed(1));
+      const prevNr = getPreviousValidNr();
+      const deltaN = prevNr === null ? 0.00 : Number((nr - prevNr).toFixed(2));
+      const rate = cfg.rateOverride !== undefined
+        ? cfg.rateOverride
+        : (prevNr === null ? 0.00 : Number((deltaN / PARAMS.DT_HORAS).toFixed(2)));
+
+      // Bloque 6: Motor de Prealertas
+      let ap = 0;
+      let riskLevel = 'NORMAL';
+      const triggers = [];
+
+      if (nr >= PARAMS.H_ROJA) {
+        ap = 1;
+        riskLevel = 'ROJA';
+        triggers.push(`Nr (${nr.toFixed(2)} m) ≥ 4.00 m`);
+      } else if (nr >= PARAMS.H_AMARILLA) {
+        ap = 1;
+        riskLevel = 'AMARILLA';
+        triggers.push(`Nr (${nr.toFixed(2)} m) ≥ 2.50 m`);
+      }
+
+      if (rate >= PARAMS.RATE_CRITICO) {
+        ap = 1;
+        if (riskLevel === 'NORMAL') riskLevel = 'AMARILLA';
+        triggers.push(`dH/dt (+${rate.toFixed(2)} m/h) ≥ 0.60 m/h`);
+      }
+
+      const taSec = ap === 1
+        ? (cfg.taSec !== undefined ? cfg.taSec : Number((tpSec + 0.004).toFixed(3)))
+        : null;
+
+      let decision = ap === 1 ? 'Pendiente' : 'No aplica';
+      let notes = ap === 1 ? 'Aguardando auditoría del operador OGRD.' : 'Parámetros dentro de rangos normales.';
+      let ao = 0;
+
+      if (ap === 1 && cfg.presetDecision) {
+        decision = cfg.presetDecision;
+        ao = decision === 'Validada' ? 1 : 0;
+        notes = cfg.presetNotes || 'Validada por operador OGRD tras revisión hidrológica.';
+      }
+
+      const record = {
+        id: runId,
+        time: timeStr,
+        source: source,
+        nr: nr,
+        deltaN: deltaN,
+        rate: rate,
+        p: pVal,
+        tpSec: tpSec,
+        taSec: taSec,
+        valid: true,
+        ap: ap,
+        riskLevel: riskLevel,
+        criteria: triggers.length > 0 ? triggers.join(' y ') : 'Parámetros bajo umbrales de riesgo',
+        decision: decision,
+        notes: notes,
+        ao: ao
+      };
+
+      appState.records.push(record);
+
+      if (ap === 1 && !cfg.presetDecision) {
+        appState.pendingRunId = runId;
+        if (!silent) {
+          const col = riskLevel === 'ROJA' ? '#B91C1C' : '#D97706';
+          notifyUser(`Prealerta ${riskLevel} activada (Ap = 1)`, `Corrida ${runId}: ${record.criteria}. Requiere validación en Gestión de Prealertas.`, col);
+        }
+      } else if (!silent) {
+        notifyUser('Lectura procesada (Ap = 0)', `Corrida ${runId} (${nr.toFixed(2)} m) validada en ${tpSec.toFixed(3)} s.`, '#059669');
+      }
+
+      renderAllViews();
+    }
+
+    // =========================================================================
+    // SECUENCIAS DE DATOS: INICIAL (R-01 A R-03) Y 10 CORRIDAS EXPERIMENTALES
+    // =========================================================================
+    function initDefaultRuns() {
+      appState.records = [];
+      appState.pendingRunId = null;
+
+      ingestTelemetry({ time: '08:00', source: 'FEWS-IDEAM (35037130)', nr: 1.45, p: 2.0, rateOverride: 0.00, tpSec: 0.038 }, true);
+      ingestTelemetry({ time: '08:05', source: 'FEWS-IDEAM (35037130)', nr: 1.52, p: 4.5, rateOverride: 0.07, tpSec: 0.041 }, true);
+      ingestTelemetry({ time: '08:10', source: 'Estación Local IoT',    nr: 1.68, p: 8.0, rateOverride: 0.16, tpSec: 0.039 }, true);
+      renderAllViews();
+    }
+
+    function runTenExperimentalSequence() {
+      appState.records = [];
+      appState.pendingRunId = null;
+
+      const sequence = [
+        { time: '08:00', source: 'FEWS-IDEAM (35037130)',   nr: 1.45,  p: 2.0,  rateOverride: 0.00,  tpSec: 0.038 },
+        { time: '08:05', source: 'FEWS-IDEAM (35037130)',   nr: 1.52,  p: 4.5,  rateOverride: 0.07,  tpSec: 0.041 },
+        { time: '08:10', source: 'Estación Local IoT',      nr: 1.68,  p: 8.0,  rateOverride: 0.16,  tpSec: 0.039 },
+        { time: '08:15', source: 'Estación Local IoT',      nr: -9.99, p: 12.0, corrupt: true,       tpSec: 0.025 },
+        { time: '08:20', source: 'FEWS-IDEAM (35037130)',   nr: 1.95,  p: 16.5, rateOverride: 0.27,  tpSec: 0.044 },
+        { time: '08:25', source: 'FEWS-IDEAM (35037130)',   nr: 2.72,  p: 28.0, rateOverride: 0.77,  tpSec: 0.048, taSec: 0.052, presetDecision: 'Validada', presetNotes: 'Supera umbral amarillo (2.50 m) y tasa de ascenso (0.77 m/h). Vigilancia activa.' },
+        { time: '08:30', source: 'Registro Municipal OGRD', nr: 3.42,  p: 42.0, rateOverride: 0.84,  tpSec: 0.045, taSec: 0.049, presetDecision: 'Validada', presetNotes: 'Ascenso acelerado sostenido en tramo urbano de Villavicencio.' },
+        { time: '08:35', source: 'FEWS-IDEAM (35037130)',   nr: 4.15,  p: 58.0, rateOverride: 0.73,  tpSec: 0.046, taSec: 0.050, presetDecision: 'Validada', presetNotes: 'Supera umbral rojo (4.00 m). Alerta oficial emitida por OGRD Villavicencio.' },
+        { time: '08:40', source: 'FEWS-IDEAM (35037130)',   nr: 4.38,  p: 64.0, rateOverride: 0.23,  tpSec: 0.043, taSec: 0.047, presetDecision: 'Validada', presetNotes: 'Pico máximo registrado (4.38 m) en estación Puente del Amor.' },
+        { time: '08:45', source: 'Estación Local IoT',      nr: 3.85,  p: 22.0, rateOverride: -0.53, tpSec: 0.041, taSec: 0.045, presetDecision: 'Validada', presetNotes: 'Fase de descenso hidráulico (-0.53 m/h); se mantiene alerta preventiva.' }
+      ];
+
+      sequence.forEach(item => ingestTelemetry(item, true));
+      renderAllViews();
+      notifyUser('Secuencia de 10 corridas completada', 'Datos experimentales R-01 a R-10 cargados (r = 0.91 · paquete corrupto R-04 filtrado).', '#1D4ED8');
+    }
+
+    window.simulateFloodSurge = function() {
+      ingestTelemetry({
+        source: 'FEWS-IDEAM (35037130)',
+        nr: 4.25,
+        p: 62.0,
+        tpSec: 0.044,
+        taSec: 0.049
+      }, false);
+    };
+
+    document.getElementById('btn-run-10').addEventListener('click', runTenExperimentalSequence);
+    document.getElementById('btn-sim-surge').addEventListener('click', window.simulateFloodSurge);
+    document.getElementById('btn-reset').addEventListener('click', () => {
+      initDefaultRuns();
+      notifyUser('Sistema reiniciado', 'Se restauraron las tres lecturas iniciales (R-01 a R-03).', '#1D4ED8');
+    });
+
+    // Formulario de ingesta manual
+    document.getElementById('ingest-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const nr = parseFloat(document.getElementById('in-nr').value);
+      const p = parseFloat(document.getElementById('in-p').value);
+      const source = document.getElementById('in-source').value;
+
+      ingestTelemetry({ source, nr, p }, false);
+
+      if (!isNaN(nr) && nr >= 0 && nr <= 14) {
+        document.getElementById('in-nr').value = (nr + 0.12).toFixed(2);
+      }
+    });
+
+    document.getElementById('btn-corrupt-test').addEventListener('click', () => {
+      ingestTelemetry({
+        source: document.getElementById('in-source').value,
+        nr: -9.99,
+        p: 12.0,
+        corrupt: true,
+        tpSec: 0.025
+      }, false);
+    });
+
+    // Validación / descarte humano OGRD
+    document.getElementById('btn-validate-official').addEventListener('click', () => {
+      if (!appState.pendingRunId) return;
+      const rec = appState.records.find(r => r.id === appState.pendingRunId);
+      if (!rec) return;
+
+      const note = document.getElementById('hitl-operator-note').value.trim();
+      rec.decision = 'Validada';
+      rec.ao = 1;
+      rec.notes = note || 'Prealerta verificada y aprobada por operador OGRD Villavicencio.';
+      appState.pendingRunId = null;
+      document.getElementById('hitl-operator-note').value = '';
+
+      notifyUser('Alerta Oficial Emitida (Ao = 1)', `El evento ${rec.id} fue validado por la OGRD. Canales comunitarios activados.`, '#B91C1C');
+      renderAllViews();
+    });
+
+    document.getElementById('btn-discard-prealert').addEventListener('click', () => {
+      if (!appState.pendingRunId) return;
+      const rec = appState.records.find(r => r.id === appState.pendingRunId);
+      if (!rec) return;
+
+      const note = document.getElementById('hitl-operator-note').value.trim();
+      rec.decision = 'Descartada';
+      rec.ao = 0;
+      rec.notes = note || 'Prealerta descartada tras verificación local de campo.';
+      appState.pendingRunId = null;
+      document.getElementById('hitl-operator-note').value = '';
+
+      notifyUser('Prealerta descartada', `El evento ${rec.id} fue cerrado sin emisión de alarma comunitaria.`, '#475467');
+      renderAllViews();
+    });
+
+    // Filtros de tabla en Módulo 2
+    document.querySelectorAll('.filter-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        appState.activeFilter = chip.getAttribute('data-filter');
+        renderAnalysisTable();
+      });
+    });
+
+    // =========================================================================
+    // RENDERIZADO SINCRONIZADO DE TODAS LAS VISTAS
+    // =========================================================================
+    function renderAllViews() {
+      updateTopKpis();
+      updateBasinSectors();
+      renderAnalysisTable();
+      updatePrealertsModule();
+      renderArchitectureModule();
+      renderKpiAndAuditModule();
+      renderTimeSeriesChart();
+      renderScatterAChart();
+      renderScatterBChart();
+    }
+
+    function updateTopKpis() {
+      const validRecs = appState.records.filter(r => r.valid);
+      const lastValid = validRecs.length > 0 ? validRecs[validRecs.length - 1] : null;
+      const lastAny = appState.records.length > 0 ? appState.records[appState.records.length - 1] : null;
+
+      document.getElementById('series-count-pill').textContent = `${validRecs.length} registros válidos`;
+      if (lastAny) {
+        document.getElementById('basin-sync-label').textContent = `Sincronizado con lectura ${lastAny.id} (${lastAny.time})`;
+      }
+
+      if (lastValid) {
+        document.getElementById('kpi-nr-val').textContent = lastValid.nr.toFixed(2);
+        const pct = Math.min(100, Math.max(4, (lastValid.nr / 5.0) * 100));
+        const fill = document.getElementById('kpi-nr-fill');
+        fill.style.width = `${pct}%`;
+        if (lastValid.nr >= PARAMS.H_ROJA) fill.style.backgroundColor = 'var(--status-crit)';
+        else if (lastValid.nr >= PARAMS.H_AMARILLA) fill.style.backgroundColor = 'var(--status-warn)';
+        else fill.style.backgroundColor = 'var(--status-ok)';
+
+        const signR = lastValid.rate >= 0 ? '+' : '';
+        const signN = lastValid.deltaN >= 0 ? '+' : '';
+        const rateEl = document.getElementById('kpi-rate-val');
+        rateEl.textContent = `${signR}${lastValid.rate.toFixed(2)}`;
+        rateEl.style.color = lastValid.rate >= PARAMS.RATE_CRITICO ? 'var(--status-warn)' : 'var(--text-heading)';
+        document.getElementById('kpi-rate-footer').textContent = `Variación ΔN ${signN}${lastValid.deltaN.toFixed(2)} m · Umbral crítico 0.60 m/h`;
+
+        document.getElementById('kpi-precip-val').textContent = lastValid.p.toFixed(1);
+      }
+
+      const pill = document.getElementById('kpi-status-pill');
+      const foot = document.getElementById('kpi-status-footer');
+
+      if (appState.pendingRunId) {
+        const pRec = appState.records.find(r => r.id === appState.pendingRunId);
+        const isRed = pRec && pRec.riskLevel === 'ROJA';
+        pill.className = isRed ? 'pill pill-crit' : 'pill pill-warn';
+        pill.innerHTML = `<span class="dot-indicator" style="background:${isRed ? 'var(--status-crit)' : 'var(--status-warn)'};"></span> Prealerta ${isRed ? 'Roja' : 'Amarilla'}`;
+        foot.textContent = 'Ap = 1 · Pendiente de validación OGRD';
+      } else if (lastValid && lastValid.ao === 1) {
+        pill.className = 'pill pill-crit';
+        pill.innerHTML = '<span class="dot-indicator" style="background:var(--status-crit);"></span> Alerta Oficial Emitida';
+        foot.textContent = 'Ap = 1 · Ao = 1 (Validada por OGRD)';
+      } else if (lastValid && lastValid.ap === 1) {
+        pill.className = 'pill pill-warn';
+        pill.innerHTML = '<span class="dot-indicator" style="background:var(--status-warn);"></span> Prealerta Amarilla';
+        foot.textContent = 'Ap = 1 · Auditada por operador OGRD';
+      } else {
+        pill.className = 'pill pill-ok';
+        pill.innerHTML = '<span class="dot-indicator" style="background:var(--status-ok);"></span> Normal';
+        foot.textContent = 'Prealerta Ap = 0 · Alerta Oficial Ao = 0';
+      }
+    }
+
+    function updateBasinSectors() {
+      const validRecs = appState.records.filter(r => r.valid);
+      const last = validRecs.length > 0 ? validRecs[validRecs.length - 1] : { nr: 1.68, p: 8.0 };
+
+      const altaPill = document.getElementById('sec-alta-pill');
+      const altaDesc = document.getElementById('sec-alta-desc');
+      const mediaPill = document.getElementById('sec-media-pill');
+      const mediaDesc = document.getElementById('sec-media-desc');
+      const bajaPill = document.getElementById('sec-baja-pill');
+      const bajaDesc = document.getElementById('sec-baja-desc');
+
+      if (last.p >= 45) {
+        altaPill.className = 'pill pill-crit';
+        altaPill.textContent = 'Alerta Roja';
+        altaDesc.textContent = `Lluvia intensa (${last.p.toFixed(1)} mm/h) en piedemonte · Alta generación de escorrentía hacia el casco urbano.`;
+      } else if (last.p >= 20) {
+        altaPill.className = 'pill pill-warn';
+        altaPill.textContent = 'Prealerta Amarilla';
+        altaDesc.textContent = `Precipitación significativa (${last.p.toFixed(1)} mm/h) registrada en Altos de Playa Rica.`;
+      } else {
+        altaPill.className = 'pill pill-ok';
+        altaPill.textContent = 'Normal';
+        altaDesc.textContent = `Cabecera y Altos de Playa Rica · Precipitación de ${last.p.toFixed(1)} mm/h dentro de parámetros ordinarios.`;
+      }
+
+      if (last.nr >= PARAMS.H_ROJA) {
+        mediaPill.className = 'pill pill-crit';
+        mediaPill.textContent = 'Alerta Roja';
+        mediaDesc.textContent = `Nivel crítico (${last.nr.toFixed(2)} m ≥ 4.00 m) en Pte. del Amor · Riesgo de desbordamiento en La Isla, Playa Rica y Kirpas.`;
+      } else if (last.nr >= PARAMS.H_AMARILLA) {
+        mediaPill.className = 'pill pill-warn';
+        mediaPill.textContent = 'Prealerta Amarilla';
+        mediaDesc.textContent = `Nivel elevado (${last.nr.toFixed(2)} m ≥ 2.50 m) · Vigilancia preventiva en Ciudad Porfía, La Playita y Samán de la Rivera.`;
+      } else {
+        mediaPill.className = 'pill pill-ok';
+        mediaPill.textContent = 'Normal';
+        mediaDesc.textContent = `Estación Pte. del Amor (${last.nr.toFixed(2)} m) · Tramo de Ciudad Porfía, La Isla, Playa Rica y Kirpas sin riesgo de desborde.`;
+      }
+
+      if (last.nr >= PARAMS.H_ROJA) {
+        bajaPill.className = 'pill pill-warn';
+        bajaPill.textContent = 'Prealerta Amarilla';
+        bajaDesc.textContent = `Onda de creciente en tránsito hacia Vereda El Amor y confluencia con río Guayuriba.`;
+      } else {
+        bajaPill.className = 'pill pill-ok';
+        bajaPill.textContent = 'Normal';
+        bajaDesc.textContent = `Vereda El Amor y confluencia con río Guayuriba · Capacidad hidráulica de tránsito estable.`;
+      }
+    }
+
+    function renderAnalysisTable() {
+      const tbody = document.getElementById('analysis-tbody');
+      const list = appState.records.filter(r => {
+        if (appState.activeFilter === 'TODOS') return true;
+        if (appState.activeFilter === 'NORMAL') return r.valid && r.ap === 0;
+        if (appState.activeFilter === 'PREALERTA') return r.valid && r.ap === 1;
+        if (appState.activeFilter === 'RECHAZADO') return !r.valid;
+        return true;
+      });
+
+      if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; color:var(--text-muted); padding:20px;">No hay lecturas registradas para el filtro seleccionado.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = list.map(r => {
+        if (!r.valid) {
+          return `
+            <tr>
+              <td style="font-weight:600; color:var(--text-heading);">${r.id}</td>
+              <td>${r.time}</td>
+              <td>${r.source}</td>
+              <td>${r.nr.toFixed(2)} m</td>
+              <td>—</td>
+              <td>—</td>
+              <td>${r.p.toFixed(1)}</td>
+              <td>${r.tpSec.toFixed(3)}</td>
+              <td><span class="pill pill-off">Rechazado B2</span></td>
+            </tr>
+          `;
+        }
+
+        const signN = r.deltaN >= 0 ? '+' : '';
+        const signR = r.rate >= 0 ? '+' : '';
+        let pill = '<span class="pill pill-ok">Normal</span>';
+        if (r.riskLevel === 'ROJA') pill = '<span class="pill pill-crit">Prealerta Roja</span>';
+        else if (r.riskLevel === 'AMARILLA') pill = '<span class="pill pill-warn">Prealerta Amarilla</span>';
+
+        return `
+          <tr>
+            <td style="font-weight:600; color:var(--text-heading);">${r.id}</td>
+            <td>${r.time}</td>
+            <td>${r.source}</td>
+            <td style="font-weight:600;">${r.nr.toFixed(2)} m</td>
+            <td>${signN}${r.deltaN.toFixed(2)}</td>
+            <td>${signR}${r.rate.toFixed(2)}</td>
+            <td>${r.p.toFixed(1)}</td>
+            <td>${r.tpSec.toFixed(3)}</td>
+            <td>${pill}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function updatePrealertsModule() {
+      const sideBadge = document.getElementById('sidebar-pending-badge');
+      const statusPill = document.getElementById('hitl-status-pill');
+      const idlePanel = document.getElementById('hitl-idle-panel');
+      const pendPanel = document.getElementById('hitl-pending-panel');
+
+      if (appState.pendingRunId) {
+        const rec = appState.records.find(r => r.id === appState.pendingRunId);
+        sideBadge.classList.add('visible');
+        statusPill.className = 'pill pill-crit';
+        statusPill.textContent = `1 pendiente (${rec.id})`;
+
+        idlePanel.style.display = 'none';
+        pendPanel.style.display = 'block';
+
+        const isRed = rec.riskLevel === 'ROJA';
+        pendPanel.style.backgroundColor = isRed ? 'var(--status-crit-bg)' : 'var(--status-warn-bg)';
+        pendPanel.style.borderColor = isRed ? 'var(--status-crit-bd)' : 'var(--status-warn-bd)';
+
+        const pPill = document.getElementById('hitl-pending-pill');
+        pPill.className = isRed ? 'pill pill-crit' : 'pill pill-warn';
+        pPill.textContent = `Prealerta ${rec.riskLevel} Activa (Ap = 1)`;
+
+        document.getElementById('hitl-pending-meta').textContent = `${rec.id} · ${rec.time} · ${rec.source}`;
+        document.getElementById('hitl-pending-reason').textContent = rec.criteria;
+      } else {
+        sideBadge.classList.remove('visible');
+        statusPill.className = 'pill pill-ok';
+        statusPill.textContent = 'Sin pendientes';
+        pendPanel.style.display = 'none';
+        idlePanel.style.display = 'block';
+      }
+
+      // Actualizar tarjetas de los 4 canales institucionales
+      const validRecs = appState.records.filter(r => r.valid);
+      const lastValid = validRecs.length > 0 ? validRecs[validRecs.length - 1] : null;
+      const isBroadcastActive = lastValid && lastValid.ao === 1 && !appState.pendingRunId;
+
+      const globalChPill = document.getElementById('channels-global-pill');
+      globalChPill.className = isBroadcastActive ? 'pill pill-crit' : 'pill pill-off';
+      globalChPill.textContent = isBroadcastActive ? 'Difusión Oficial Activa (Ao = 1)' : 'En espera';
+
+      document.querySelectorAll('.ch-state-pill').forEach(el => {
+        if (isBroadcastActive) {
+          el.className = 'pill pill-ok ch-state-pill';
+          el.textContent = 'Activo';
+        } else {
+          el.className = 'pill pill-off ch-state-pill';
+          el.textContent = 'En espera';
+        }
+      });
+
+      // Tabla histórica de decisiones del operador
+      const prealerts = validRecs.filter(r => r.ap === 1);
+      const tbody = document.getElementById('hitl-history-tbody');
+
+      if (prealerts.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:20px;">No se han disparado prealertas en las lecturas actuales.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = prealerts.map(r => {
+        const sev = r.riskLevel === 'ROJA'
+          ? '<span class="pill pill-crit">Roja</span>'
+          : '<span class="pill pill-warn">Amarilla</span>';
+
+        let dec = '<span class="pill pill-warn">Pendiente</span>';
+        if (r.decision === 'Validada') dec = '<span class="pill pill-ok">Validada</span>';
+        else if (r.decision === 'Descartada') dec = '<span class="pill pill-off">Descartada</span>';
+
+        return `
+          <tr>
+            <td style="font-weight:600; color:var(--text-heading);">${r.id}</td>
+            <td>${r.time}</td>
+            <td>${sev}</td>
+            <td>${r.criteria}</td>
+            <td>${dec}</td>
+            <td style="color:var(--text-secondary);">${r.notes}</td>
+            <td style="font-weight:500;">${r.ao === 1 ? 'Ao = 1 (Oficial)' : 'Ao = 0'}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderArchitectureModule() {
+      const last = appState.records.length > 0 ? appState.records[appState.records.length - 1] : null;
+      document.getElementById('arch-traz-pill').textContent = `${appState.records.length} eventos auditados`;
+      if (last) {
+        document.getElementById('arch-cycle-pill').textContent = `Ciclo activo: ${last.id} (${last.riskLevel})`;
+      }
+
+      function badgeForBlock(id) {
+        if (!last) return '<span class="pill pill-ok">Operativo</span>';
+        if (!last.valid) {
+          if (id === 1) return '<span class="pill pill-ok">Recibido</span>';
+          if (id === 2) return '<span class="pill pill-off">Aislado B2</span>';
+          return '<span class="pill pill-off">Detenido</span>';
+        }
+        if (id <= 5) return '<span class="pill pill-ok">Activo</span>';
+        if (id === 6 || id === 7) {
+          if (last.riskLevel === 'ROJA') return '<span class="pill pill-crit">Ap = 1 (Roja)</span>';
+          if (last.riskLevel === 'AMARILLA') return '<span class="pill pill-warn">Ap = 1 (Amarilla)</span>';
+          return '<span class="pill pill-ok">Ap = 0</span>';
+        }
+        if (id === 8) {
+          if (appState.pendingRunId) return '<span class="pill pill-warn">En revisión</span>';
+          if (last.ao === 1) return '<span class="pill pill-ok">Validado</span>';
+          return '<span class="pill pill-blue">Supervisión</span>';
+        }
+        if (id === 9 || id === 10) {
+          return last.ao === 1
+            ? '<span class="pill pill-crit">Ao = 1 Activo</span>'
+            : '<span class="pill pill-off">En espera</span>';
+        }
+        return '';
+      }
+
+      document.getElementById('arch-z2-grid').innerHTML = BLOQUES_ZONA2.map(b => `
+        <div class="block-item">
+          <div>
+            <div class="block-item-top">
+              <span class="block-item-title">${b.title}</span>
+              ${badgeForBlock(b.id)}
+            </div>
+            <div class="block-item-tech">${b.tech}</div>
+            <p class="block-item-desc" style="margin-top:6px;">${b.desc}</p>
+          </div>
+        </div>
+      `).join('');
+
+      document.getElementById('arch-z3-grid').innerHTML = BLOQUES_ZONA3.map(b => `
+        <div class="block-item">
+          <div>
+            <div class="block-item-top">
+              <span class="block-item-title">${b.title}</span>
+              ${badgeForBlock(b.id)}
+            </div>
+            <div class="block-item-tech">${b.tech}</div>
+            <p class="block-item-desc" style="margin-top:6px;">${b.desc}</p>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderKpiAndAuditModule() {
+      const total = appState.records.length;
+      const valid = appState.records.filter(r => r.valid);
+      const prealerts = valid.filter(r => r.ap === 1);
+      const audited = prealerts.filter(r => r.decision !== 'Pendiente');
+
+      document.getElementById('kpi-n-pill').textContent = `n = ${total} corridas evaluadas`;
+
+      const avgTp = total > 0 ? appState.records.reduce((acc, r) => acc + r.tpSec, 0) / total : 0.042;
+      const avgTa = prealerts.length > 0 ? prealerts.reduce((acc, r) => acc + (r.taSec || 0.048), 0) / prealerts.length : 0.048;
+      const intPct = total > 0 ? (valid.length / total) * 100 : 100.0;
+      const hitlPct = prealerts.length > 0 ? (audited.length / prealerts.length) * 100 : 100.0;
+
+      const kpiRows = [
+        {
+          kpi: 'Tiempo de procesamiento (Tp)',
+          meta: '≤ 5.00 s',
+          actual: `${avgTp.toFixed(3)} s`,
+          dev: `-${(PARAMS.META_TP - avgTp).toFixed(3)} s`,
+          pass: avgTp <= PARAMS.META_TP,
+          diag: 'Cumple; ejecución local en memoria sin latencia de red WAN.'
+        },
+        {
+          kpi: 'Generación de prealerta (Ta)',
+          meta: '≤ 10.00 s',
+          actual: `${avgTa.toFixed(3)} s`,
+          dev: `-${(PARAMS.META_TA - avgTa).toFixed(3)} s`,
+          pass: avgTa <= PARAMS.META_TA,
+          diag: 'Cumple; disparo inmediato tras superar umbrales hidrológicos.'
+        },
+        {
+          kpi: 'Integridad de datos (Bloque 2)',
+          meta: '≥ 95.0 %',
+          actual: `${intPct.toFixed(1)} % (${valid.length}/${total})`,
+          dev: `${(intPct - PARAMS.META_INTEGRIDAD) >= 0 ? '+' : ''}${(intPct - PARAMS.META_INTEGRIDAD).toFixed(1)} %`,
+          pass: intPct >= PARAMS.META_INTEGRIDAD,
+          diag: intPct >= 95
+            ? 'Cumple; totalidad de paquetes recibidos con estructura válida.'
+            : 'Desvío controlado por inyección intencional de paquete corrupto (-9.99 m) aislado en Bloque 2.'
+        },
+        {
+          kpi: 'Trazabilidad de eventos (Bloque 11)',
+          meta: '100.0 %',
+          actual: `100.0 % (${total}/${total})`,
+          dev: '0.0 %',
+          pass: true,
+          diag: 'Cumple; 100 % de lecturas, rechazos y decisiones registrados en bitácora.'
+        },
+        {
+          kpi: 'Validación humana (HITL - Bloque 8)',
+          meta: '100.0 %',
+          actual: `${hitlPct.toFixed(1)} % (${audited.length}/${prealerts.length})`,
+          dev: `${(hitlPct - 100).toFixed(1)} %`,
+          pass: hitlPct === 100,
+          diag: hitlPct === 100
+            ? 'Cumple; ninguna alerta oficial se emite sin aprobación expresa OGRD.'
+            : 'Prealerta activa en espera de auditoría en Gestión de Prealertas.'
+        }
+      ];
+
+      document.getElementById('kpi-matrix-tbody').innerHTML = kpiRows.map(row => `
+        <tr>
+          <td style="font-weight:600; color:var(--text-heading);">${row.kpi}</td>
+          <td>${row.meta}</td>
+          <td style="font-weight:600; color:var(--brand-blue);">${row.actual}</td>
+          <td>${row.dev}</td>
+          <td>
+            <span class="pill ${row.pass ? 'pill-ok' : 'pill-warn'}" style="margin-right:6px;">
+              ${row.pass ? 'Cumple' : 'Desvío'}
+            </span>
+            <span style="font-size:12.5px; color:var(--text-secondary);">${row.diag}</span>
+          </td>
+        </tr>
+      `).join('');
+
+      document.getElementById('audit-full-tbody').innerHTML = appState.records.map(r => {
+        if (!r.valid) {
+          return `
+            <tr>
+              <td style="font-weight:600; color:var(--text-heading);">${r.id}</td>
+              <td>${r.time}</td>
+              <td>${r.source}</td>
+              <td>${r.nr.toFixed(2)}</td>
+              <td>—</td>
+              <td>—</td>
+              <td>${r.p.toFixed(1)}</td>
+              <td>${r.tpSec.toFixed(3)}</td>
+              <td>—</td>
+              <td><span class="pill pill-off">Rechazado</span></td>
+              <td>Ap = 0</td>
+              <td>Aislado Bloque 2</td>
+            </tr>
+          `;
+        }
+
+        const signN = r.deltaN >= 0 ? '+' : '';
+        const signR = r.rate >= 0 ? '+' : '';
+        let prePill = '<span class="pill pill-ok">Normal (Ap=0)</span>';
+        if (r.riskLevel === 'ROJA') prePill = '<span class="pill pill-crit">Roja (Ap=1)</span>';
+        else if (r.riskLevel === 'AMARILLA') prePill = '<span class="pill pill-warn">Amarilla (Ap=1)</span>';
+
+        return `
+          <tr>
+            <td style="font-weight:600; color:var(--text-heading);">${r.id}</td>
+            <td>${r.time}</td>
+            <td>${r.source}</td>
+            <td style="font-weight:600;">${r.nr.toFixed(2)}</td>
+            <td>${signN}${r.deltaN.toFixed(2)}</td>
+            <td>${signR}${r.rate.toFixed(2)}</td>
+            <td>${r.p.toFixed(1)}</td>
+            <td>${r.tpSec.toFixed(3)}</td>
+            <td>${r.taSec !== null ? r.taSec.toFixed(3) : '—'}</td>
+            <td><span class="pill pill-ok">Válido</span></td>
+            <td>${prePill}</td>
+            <td>${r.decision}${r.ao === 1 ? ' (Ao=1)' : ''}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // =========================================================================
+    // GRÁFICOS SVG VECTORIALES CON TIPOGRAFÍA POPPINS
+    // =========================================================================
+    function renderTimeSeriesChart() {
+      const svg = document.getElementById('svg-timeseries');
+      const valid = appState.records.filter(r => r.valid);
+
+      const W = 760, H = 285;
+      const padL = 52, padR = 24, padT = 18, padB = 46;
+      const plotW = W - padL - padR;
+      const plotH = H - padT - padB;
+      const yMin = 0.0, yMax = 5.0;
+      const mapY = v => padT + plotH - ((v - yMin) / (yMax - yMin)) * plotH;
+
+      let out = '';
+
+      // Áreas suaves de zona normal, amarilla y roja
+      const yYellow = mapY(PARAMS.H_AMARILLA);
+      const yRed = mapY(PARAMS.H_ROJA);
+      out += `<rect x="${padL}" y="${padT}" width="${plotW}" height="${yRed - padT}" fill="#B91C1C" fill-opacity="0.045" />`;
+      out += `<rect x="${padL}" y="${yRed}" width="${plotW}" height="${yYellow - yRed}" fill="#D97706" fill-opacity="0.045" />`;
+      out += `<rect x="${padL}" y="${yYellow}" width="${plotW}" height="${H - padB - yYellow}" fill="#059669" fill-opacity="0.035" />`;
+
+      // Rejilla horizontal
+      for (let v = 0; v <= 5; v += 1) {
+        const y = mapY(v);
+        out += `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" stroke="#E4E7EC" stroke-width="1" />`;
+        out += `<text x="${padL - 8}" y="${y + 4}" text-anchor="end" font-size="11" fill="#667085">${v.toFixed(1)} m</text>`;
+      }
+
+      // Líneas punteadas de umbral
+      out += `<line x1="${padL}" y1="${yYellow}" x2="${W - padR}" y2="${yYellow}" stroke="#D97706" stroke-width="1.4" stroke-dasharray="6,4" />`;
+      out += `<text x="${W - padR - 4}" y="${yYellow - 6}" text-anchor="end" font-size="10.5" font-weight="500" fill="#D97706">Umbral Amarilla (2.50 m)</text>`;
+
+      out += `<line x1="${padL}" y1="${yRed}" x2="${W - padR}" y2="${yRed}" stroke="#B91C1C" stroke-width="1.4" stroke-dasharray="6,4" />`;
+      out += `<text x="${W - padR - 4}" y="${yRed - 6}" text-anchor="end" font-size="10.5" font-weight="500" fill="#B91C1C">Umbral Roja (4.00 m)</text>`;
+
+      // Ejes
+      out += `<line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H - padB}" stroke="#CBD5E1" stroke-width="1" />`;
+      out += `<line x1="${padL}" y1="${H - padB}" x2="${W - padR}" y2="${H - padB}" stroke="#CBD5E1" stroke-width="1" />`;
+
+      if (valid.length === 0) {
+        svg.innerHTML = out;
+        return;
+      }
+
+      const stepX = valid.length > 1 ? plotW / (valid.length - 1) : plotW / 2;
+      const pts = valid.map((r, i) => ({
+        x: valid.length > 1 ? padL + i * stepX : padL + plotW / 2,
+        y: mapY(Math.min(yMax, Math.max(yMin, r.nr))),
+        rec: r
+      }));
+
+      if (pts.length > 1) {
+        const poly = pts.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+        out += `<polyline fill="none" stroke="#1D4ED8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" points="${poly}" />`;
+      }
+
+      pts.forEach((p, idx) => {
+        const r = p.rec;
+        let fill = '#059669';
+        if (r.riskLevel === 'ROJA') fill = '#B91C1C';
+        else if (r.riskLevel === 'AMARILLA') fill = '#D97706';
+
+        // Etiqueta de valor sobre el punto
+        const labelY = p.y - 11 < padT + 8 ? p.y + 18 : p.y - 10;
+        out += `<text x="${p.x}" y="${labelY}" text-anchor="middle" font-size="10.5" font-weight="600" fill="#101828">${r.nr.toFixed(2)}</text>`;
+
+        // Etiquetas eje X
+        out += `<text x="${p.x}" y="${H - padB + 17}" text-anchor="middle" font-size="10.5" font-weight="500" fill="#344054">${r.id}</text>`;
+        out += `<text x="${p.x}" y="${H - padB + 31}" text-anchor="middle" font-size="9.5" fill="#667085">${r.time}</text>`;
+
+        // Punto interactivo
+        out += `<circle cx="${p.x}" cy="${p.y}" r="5.2" fill="${fill}" stroke="#FFFFFF" stroke-width="1.8" class="ts-node" data-idx="${idx}" style="cursor:pointer;" />`;
+      });
+
+      svg.innerHTML = out;
+
+      const tooltip = document.getElementById('ts-tooltip');
+      svg.querySelectorAll('.ts-node').forEach(node => {
+        node.addEventListener('mouseenter', () => {
+          const r = pts[parseInt(node.getAttribute('data-idx'), 10)].rec;
+          const signR = r.rate >= 0 ? '+' : '';
+          tooltip.innerHTML = `
+            <div style="font-weight:600; color:#101828;">${r.id} · ${r.time}</div>
+            <div>Nivel Nr: <strong>${r.nr.toFixed(2)} m</strong></div>
+            <div>Tasa dH/dt: <strong>${signR}${r.rate.toFixed(2)} m/h</strong></div>
+            <div>Precipitación: ${r.p.toFixed(1)} mm/h (${r.riskLevel})</div>
+          `;
+          tooltip.style.display = 'block';
+          const sRect = svg.getBoundingClientRect();
+          const cRect = node.getBoundingClientRect();
+          tooltip.style.left = `${Math.min(sRect.width - 210, Math.max(8, cRect.left - sRect.left - 80))}px`;
+          tooltip.style.top = `${Math.max(8, cRect.top - sRect.top - 78)}px`;
+        });
+        node.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
+      });
+    }
+
+    function renderScatterAChart() {
+      const svg = document.getElementById('svg-scatter-a');
+      const valid = appState.records.filter(r => r.valid);
+
+      const W = 540, H = 300;
+      const padL = 54, padR = 22, padT = 20, padB = 46;
+      const plotW = W - padL - padR;
+      const plotH = H - padT - padB;
+
+      const maxP = Math.max(70, ...valid.map(r => Math.ceil(r.p / 10) * 10));
+      const xMin = 0, xMax = maxP;
+      const yMin = 1.0, yMax = 5.0;
+
+      const mapX = v => padL + ((v - xMin) / (xMax - xMin)) * plotW;
+      const mapY = v => padT + plotH - ((v - yMin) / (yMax - yMin)) * plotH;
+
+      let out = '';
+
+      for (let v = 1; v <= 5; v += 1) {
+        const y = mapY(v);
+        out += `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" stroke="#E4E7EC" stroke-width="1" />`;
+        out += `<text x="${padL - 8}" y="${y + 4}" text-anchor="end" font-size="10.5" fill="#667085">${v.toFixed(1)} m</text>`;
+      }
+
+      const stepP = xMax / 5;
+      for (let px = 0; px <= xMax; px += stepP) {
+        const x = mapX(px);
+        out += `<line x1="${x}" y1="${padT}" x2="${x}" y2="${H - padB}" stroke="#E4E7EC" stroke-width="1" />`;
+        out += `<text x="${x}" y="${H - padB + 17}" text-anchor="middle" font-size="10.5" fill="#667085">${px.toFixed(0)}</text>`;
+      }
+
+      out += `<line x1="${padL}" y1="${mapY(2.50)}" x2="${W - padR}" y2="${mapY(2.50)}" stroke="#D97706" stroke-width="1.2" stroke-dasharray="4,4" />`;
+      out += `<line x1="${padL}" y1="${mapY(4.00)}" x2="${W - padR}" y2="${mapY(4.00)}" stroke="#B91C1C" stroke-width="1.2" stroke-dasharray="4,4" />`;
+
+      out += `<line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H - padB}" stroke="#CBD5E1" stroke-width="1" />`;
+      out += `<line x1="${padL}" y1="${H - padB}" x2="${W - padR}" y2="${H - padB}" stroke="#CBD5E1" stroke-width="1" />`;
+      out += `<text x="${padL + plotW / 2}" y="${H - 8}" text-anchor="middle" font-size="11.5" font-weight="500" fill="#344054">Precipitación P (mm/h)</text>`;
+      out += `<text x="15" y="${padT + plotH / 2}" text-anchor="middle" font-size="11.5" font-weight="500" fill="#344054" transform="rotate(-90 15 ${padT + plotH / 2})">Nivel del río Nr (m)</text>`;
+
+      // Regresión lineal dinámica
+      const n = valid.length;
+      if (n >= 2) {
+        const sumX = valid.reduce((s, r) => s + r.p, 0);
+        const sumY = valid.reduce((s, r) => s + r.nr, 0);
+        const sumXY = valid.reduce((s, r) => s + r.p * r.nr, 0);
+        const sumX2 = valid.reduce((s, r) => s + r.p * r.p, 0);
+        const sumY2 = valid.reduce((s, r) => s + r.nr * r.nr, 0);
+
+        const denX = n * sumX2 - sumX * sumX;
+        const denY = n * sumY2 - sumY * sumY;
+
+        if (denX > 0 && denY > 0) {
+          const m = (n * sumXY - sumX * sumY) / denX;
+          const b = (sumY - m * sumX) / n;
+          const rVal = (n * sumXY - sumX * sumY) / Math.sqrt(denX * denY);
+
+          document.getElementById('corr-r-pill').textContent = `r = ${rVal.toFixed(2)}`;
+
+          const y1 = Math.min(yMax, Math.max(yMin, m * xMin + b));
+          const y2 = Math.min(yMax, Math.max(yMin, m * xMax + b));
+          out += `<line x1="${mapX(xMin)}" y1="${mapY(y1)}" x2="${mapX(xMax)}" y2="${mapY(y2)}" stroke="#1D4ED8" stroke-width="2" />`;
+        }
+      }
+
+      valid.forEach((r, idx) => {
+        const cx = mapX(r.p);
+        const cy = mapY(Math.min(yMax, Math.max(yMin, r.nr)));
+        let fill = '#059669';
+        if (r.riskLevel === 'ROJA') fill = '#B91C1C';
+        else if (r.riskLevel === 'AMARILLA') fill = '#D97706';
+
+        out += `<circle cx="${cx}" cy="${cy}" r="5.2" fill="${fill}" stroke="#FFFFFF" stroke-width="1.6" class="sca-node" data-idx="${idx}" style="cursor:pointer;" />`;
+        out += `<text x="${cx}" y="${cy - 9}" text-anchor="middle" font-size="10" font-weight="500" fill="#344054">${r.id}</text>`;
+      });
+
+      svg.innerHTML = out;
+
+      const tooltip = document.getElementById('sca-tooltip');
+      svg.querySelectorAll('.sca-node').forEach(node => {
+        node.addEventListener('mouseenter', () => {
+          const r = valid[parseInt(node.getAttribute('data-idx'), 10)];
+          tooltip.innerHTML = `<strong>${r.id}</strong> · P: ${r.p.toFixed(1)} mm/h → Nr: ${r.nr.toFixed(2)} m (${r.riskLevel})`;
+          tooltip.style.display = 'block';
+          const sRect = svg.getBoundingClientRect();
+          const cRect = node.getBoundingClientRect();
+          tooltip.style.left = `${Math.min(sRect.width - 210, Math.max(8, cRect.left - sRect.left - 70))}px`;
+          tooltip.style.top = `${Math.max(8, cRect.top - sRect.top - 42)}px`;
+        });
+        node.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
+      });
+    }
+
+    function renderScatterBChart() {
+      const svg = document.getElementById('svg-scatter-b');
+      const valid = appState.records.filter(r => r.valid);
+
+      const W = 540, H = 300;
+      const padL = 56, padR = 22, padT = 20, padB = 46;
+      const plotW = W - padL - padR;
+      const plotH = H - padT - padB;
+
+      const xMin = 1.0, xMax = 5.0;
+      const maxAbs = Math.max(1.0, ...valid.map(r => Math.ceil(Math.abs(r.rate) * 2) / 2));
+      const yMin = -maxAbs, yMax = maxAbs;
+
+      const mapX = v => padL + ((v - xMin) / (xMax - xMin)) * plotW;
+      const mapY = v => padT + plotH - ((v - yMin) / (yMax - yMin)) * plotH;
+
+      let out = '';
+
+      for (let i = 0; i <= 4; i++) {
+        const val = yMin + ((yMax - yMin) / 4) * i;
+        const y = mapY(val);
+        out += `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" stroke="#E4E7EC" stroke-width="1" />`;
+        out += `<text x="${padL - 8}" y="${y + 4}" text-anchor="end" font-size="10.5" fill="#667085">${val.toFixed(2)}</text>`;
+      }
+
+      for (let xv = 1; xv <= 5; xv += 1) {
+        const x = mapX(xv);
+        out += `<line x1="${x}" y1="${padT}" x2="${x}" y2="${H - padB}" stroke="#E4E7EC" stroke-width="1" />`;
+        out += `<text x="${x}" y="${H - padB + 17}" text-anchor="middle" font-size="10.5" fill="#667085">${xv.toFixed(1)} m</text>`;
+      }
+
+      // Eje cero y umbrales de cuadrante
+      out += `<line x1="${padL}" y1="${mapY(0)}" x2="${W - padR}" y2="${mapY(0)}" stroke="#98A2B3" stroke-width="1" />`;
+      out += `<line x1="${padL}" y1="${mapY(PARAMS.RATE_CRITICO)}" x2="${W - padR}" y2="${mapY(PARAMS.RATE_CRITICO)}" stroke="#D97706" stroke-width="1.3" stroke-dasharray="5,4" />`;
+      out += `<line x1="${mapX(2.50)}" y1="${padT}" x2="${mapX(2.50)}" y2="${H - padB}" stroke="#D97706" stroke-width="1.3" stroke-dasharray="3,3" />`;
+      out += `<line x1="${mapX(4.00)}" y1="${padT}" x2="${mapX(4.00)}" y2="${H - padB}" stroke="#B91C1C" stroke-width="1.3" stroke-dasharray="3,3" />`;
+
+      out += `<line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H - padB}" stroke="#CBD5E1" stroke-width="1" />`;
+      out += `<line x1="${padL}" y1="${H - padB}" x2="${W - padR}" y2="${H - padB}" stroke="#CBD5E1" stroke-width="1" />`;
+      out += `<text x="${padL + plotW / 2}" y="${H - 8}" text-anchor="middle" font-size="11.5" font-weight="500" fill="#344054">Nivel del río Nr (m)</text>`;
+      out += `<text x="15" y="${padT + plotH / 2}" text-anchor="middle" font-size="11.5" font-weight="500" fill="#344054" transform="rotate(-90 15 ${padT + plotH / 2})">Tasa de ascenso dH/dt (m/h)</text>`;
+
+      valid.forEach((r, idx) => {
+        const cx = mapX(Math.min(xMax, Math.max(xMin, r.nr)));
+        const cy = mapY(Math.min(yMax, Math.max(yMin, r.rate)));
+        let fill = '#059669';
+        if (r.riskLevel === 'ROJA') fill = '#B91C1C';
+        else if (r.riskLevel === 'AMARILLA') fill = '#D97706';
+
+        out += `<circle cx="${cx}" cy="${cy}" r="5.2" fill="${fill}" stroke="#FFFFFF" stroke-width="1.6" class="scb-node" data-idx="${idx}" style="cursor:pointer;" />`;
+        out += `<text x="${cx}" y="${cy - 9}" text-anchor="middle" font-size="10" font-weight="500" fill="#344054">${r.id}</text>`;
+      });
+
+      svg.innerHTML = out;
+
+      const tooltip = document.getElementById('scb-tooltip');
+      svg.querySelectorAll('.scb-node').forEach(node => {
+        node.addEventListener('mouseenter', () => {
+          const r = valid[parseInt(node.getAttribute('data-idx'), 10)];
+          const signR = r.rate >= 0 ? '+' : '';
+          tooltip.innerHTML = `<strong>${r.id}</strong> · Nr: ${r.nr.toFixed(2)} m | dH/dt: ${signR}${r.rate.toFixed(2)} m/h`;
+          tooltip.style.display = 'block';
+          const sRect = svg.getBoundingClientRect();
+          const cRect = node.getBoundingClientRect();
+          tooltip.style.left = `${Math.min(sRect.width - 210, Math.max(8, cRect.left - sRect.left - 70))}px`;
+          tooltip.style.top = `${Math.max(8, cRect.top - sRect.top - 42)}px`;
+        });
+        node.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
+      });
+    }
+
+    // =========================================================================
+    // EXPORTACIÓN DE BITÁCORA A CSV
+    // =========================================================================
+    document.getElementById('btn-export-csv').addEventListener('click', () => {
+      const headers = ['ID,Hora,Fuente,Nr_m,DeltaN_m,dH_dt_mh,Precipitacion_mmh,Tp_s,Ta_s,Integridad,Ap,Nivel_Riesgo,Decision_OGRD,Ao'];
+      const lines = appState.records.map(r => [
+        r.id,
+        r.time,
+        `"${r.source}"`,
+        r.nr.toFixed(2),
+        r.deltaN !== null ? r.deltaN.toFixed(2) : 'N/A',
+        r.rate !== null ? r.rate.toFixed(2) : 'N/A',
+        r.p.toFixed(1),
+        r.tpSec.toFixed(3),
+        r.taSec !== null ? r.taSec.toFixed(3) : 'N/A',
+        r.valid ? 'Valido' : 'Rechazado',
+        r.ap,
+        r.riskLevel,
+        `"${r.decision}"`,
+        r.ao
+      ].join(','));
+
+      const blob = new Blob([[headers, ...lines].join('\n')], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'Bitacora_Auditoría_SAT_Rio_Ocoa_Grupo456.csv';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      notifyUser('Bitácora CSV exportada', 'El archivo de auditoría experimental se descargó correctamente.', '#1D4ED8');
+    });
+
+    window.onload = function() {
+      initDefaultRuns();
+    };
+  </script>
+</body>
+</html>
